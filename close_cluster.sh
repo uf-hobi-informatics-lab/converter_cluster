@@ -1,0 +1,1 @@
+docker compose -f clusters/$1/$1.yml down
