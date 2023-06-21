@@ -103,7 +103,7 @@ def make_cluster(partner, partner_path, datadir, workdir):
     cf = open(partner_path, 'w')
     cf.write(text) 
 
-def spark_submit(partner, partner_path, workdir, datadir):
+def spark_submit(partner, partner_path, workdir, datadir, script_name, args):
     submit_statement= '''docker run \
         --network={}_pyNet \
         -v {}:/app \
@@ -115,7 +115,7 @@ def spark_submit(partner, partner_path, workdir, datadir):
         --conf "spark.executor.memory=1g" \
         --master spark://master:7077 \
         --deploy-mode client \
-        --name my_pyspark_job /app/{} {}'''.format(partner,workdir,datadir)
+        --name my_pyspark_job /app/{} {}'''.format(partner,workdir,datadir, script_name, args)
 
     os.system(submit_statement)
 
@@ -144,6 +144,20 @@ def main():
         required=True,
         help='Directory containing the scripts to be submitted to the cluster.'
     )
+    
+    parser.add_argument(
+        '-s','--scriptname',
+        default='.',
+        required=True,
+        help='Name of the script to be run'
+    )
+
+    parser.add_argument(
+        '-a','--scriptargs',
+        default='.',
+        required=True,
+        help='args for the script'
+    )
 
     args = parser.parse_args()
     
@@ -151,6 +165,9 @@ def main():
     partner = args.partner
     datadir = args.datadir
     workdir = args.workdir
+    script = args.scriptname
+    script_args = args.scriptargs
+
     
     partner = partner.lower()
     if partner not in valid_partners:
@@ -163,8 +180,8 @@ def main():
 
     #Boot Cluster
     os.system('docker compose -f {} up -d --scale worker=5'.format(partner_path))
-    spark_submit(partner, partner_path, workdir, datadir)
+    spark_submit(partner, partner_path, workdir, datadir, script, script_args)
     os.system('docker compose -f {} down'.format(partner_path))
-    
+
 if __name__ == '__main__':
     main()
