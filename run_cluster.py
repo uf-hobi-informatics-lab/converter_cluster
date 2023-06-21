@@ -145,20 +145,12 @@ def main():
         help='Directory containing the scripts to be submitted to the cluster.'
     )
 
-    parser.add_argument(
-        '-s','--separator',
-        default=',',
-        required=True,
-        help='Separator for the passed in files'
-    )
-
     args = parser.parse_args()
     
     #Initialize environment
     partner = args.partner
     datadir = args.datadir
     workdir = args.workdir
-    separator = args.separator
     
     partner = partner.lower()
     if partner not in valid_partners:
@@ -171,6 +163,8 @@ def main():
 
     #Boot Cluster
     os.system('docker compose -f {} up -d --scale worker=5'.format(partner_path))
-
+    spark_submit(partner, partner_path, workdir, datadir)
+    os.system('docker compose -f {} down'.format(partner_path))
+    
 if __name__ == '__main__':
     main()
