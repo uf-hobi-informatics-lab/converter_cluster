@@ -1,0 +1,25 @@
+
+
+How to do individual boot, submit, shutdown commands:
+    issues:
+        - how do we know which cluster can be called?
+        - how do we keep the logging level persistent?
+        - what if the user forgets to shutdown the cluster at the end?
+        - how do we ensure that the cluster to shutdown is the correct one?
+
+
+    - keep a cluster config file that stores cluster status, name, if it has run any jobs, the time it was booted, etc, last runtime
+
+
+
+    -in the status file - need to make sure we arent adding the same cluster twice when doing an update
+     - want to modify the the status while maintaining the unique name
+     -need to check that the passed in name is not in use already, or if it is then update it
+
+
+
+     -weird edge case:
+        - what if the user calls 'shutdown' on a cluster that is currently being shutdown?
+
+
+    -add ability to kill in the middle of processing

@@ -21,8 +21,11 @@ RUN chmod 777 /opt/bitnami/spark/tmp
 RUN chmod 777 /opt/bitnami/spark/conf
 RUN chmod 777 /opt/bitnami/python/lib/python3.9/site-packages/Crypto/Cipher/XOR.py
 RUN chmod 777 /app
-RUN mkdir /data
-RUN chmod 777 /data
+RUN mv /app /docker_app
+RUN mkdir /docker_data
+RUN chmod 777 /docker_data
+
+
 
 RUN rm /opt/bitnami/python/lib/python3.9/site-packages/Crypto/Cipher/XOR.py
 

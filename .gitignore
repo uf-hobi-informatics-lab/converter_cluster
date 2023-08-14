@@ -1,14 +1,4 @@
 .DS_Store
-avh.yml
-bnd.yml
-chm.yml
-chr.yml
-emy.yml
-nch.yml
-orl.yml
-tma.yml
-tmc.yml
-uab.yml
-ufh.yml
-umi.yml
-usf.yml
+clusters/
+*.log
+info/clusters.json
