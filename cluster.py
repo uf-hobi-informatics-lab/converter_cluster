@@ -43,7 +43,7 @@ ascii_art='''
                                                                                                        
 '''
 
-absolute_cluster_path='/Users/jasonglover/Documents/Code/onefl_cluster'
+absolute_cluster_path='/onefl_cluster'
 
 logger = logging.getLogger()
 
@@ -87,16 +87,6 @@ def set_session_id(file):
     file_name, _ = os.path.splitext(file)
     return '{}_{}_{}'.format(file_name, os.getpid(), datetime.now().strftime("%Y%m%d"))
 
-#============= STATUS FUNCTIONS ============
-def remove_status(session_id):
-    
-    #Update the files            
-    os.remove('{}/status'.format(absolute_cluster_path))
-    os.rename('{}/tmp_stat'.format(absolute_cluster_path), '{}/status'.format(absolute_cluster_path))
-
-    
-#============= END STATUS FUNCTIONS ============
-
 
 def make_cluster(session_id, cluster_path, datadir, workdir):
     #Dynamically build the docker compose file on boot with appropriate mount dirs
@@ -106,7 +96,7 @@ version: "3.8"
 
 services:
   master:
-    image: 'cluster-image:latest'
+    image: 'glove-cluster:latest'
     environment:
       - SPARK_MODE=master
       - SPARK_RPC_AUTHENTICATION_ENABLED=no
@@ -115,7 +105,7 @@ services:
       - SPARK_SSL_ENABLED=no
     volumes:
       - {}:/docker_app
-      - {}:/docker_data
+      - {}:/data
     networks:
       - pyspark_cluster_network_{}
 
@@ -166,7 +156,7 @@ def spark_submit(session_id, workdir, datadir, script_name, args):
             -v {}:/docker_app \
             -v {}:/docker_data \
             --name {}_submitter \
-            --rm cluster-image \
+            --rm glove-cluster \
             /opt/bitnami/spark/bin/spark-submit \
             --conf "spark.pyspark.python=python3" \
             --conf "spark.driver.memory=2g" \
