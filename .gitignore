@@ -2,3 +2,4 @@
 clusters/
 *.log
 info/clusters.json
+info/__pycache__/*
