@@ -6,9 +6,11 @@ The OneFlorida+ Cluster is a virtualized cluster handler that uses custom softwa
 
 ### Terminology
 
-1. cluster:
-2. session_id: The unique identifier of a cluster. This will always be in the format [NAME]\_[PROCESS_ID]\_[YYYYMMDD]
-3. state: The current status of the cluster in question. A cluster
+1. `cluster`:
+2. `node`: A component of the cluster. There are three types: Worker - processes the tasks assigned by the master node, Master/Executor - the scheduler which delegates tasks to the worker nodes, Submitter - sends the passed in script to the master node for processing
+3. `session_id`: The unique identifier of a cluster. This will always be in the format [NAME]\_[PROCESS_ID]\_[YYYYMMDD]
+4. `state`: The current status of the cluster in question. A cluster can be 'Free' - Not currently running a job, 'Running' - The cluster is running a job, 'Booting' - The nodes and network for the cluster are being initialized, 'Shutting Down' - The hardware allocated for the nodes and network are being freed.
+    
 
 ### Commands
 
@@ -16,7 +18,7 @@ All commands to the cluster should be preceded by the keyword `cluster`.
 
 #### 1. run
 
-This should be the primary command send to the cluster. Calling `run` boots a cluster, submits a specified file, and then shuts down the cluster. This command requires a file for input and takes in any args that file may have. Since a file must be passed in for this command, the cluster will be named after the passed in file name. 
+This should be the primary command send to the cluster. Calling `run` boots a cluster, submits a specified file, and then shuts down the cluster. This command requires a file for input and takes in any args that file may have. Since a file must be passed in for this command, the cluster will be named after the passed in file name.
 
 *Accepted Flags:*
 
@@ -85,6 +87,16 @@ Display a list of the currently instantiated clusters with relevant details.
 *Syntax:*
 
     $ cluster status [-h]
+
+*Example output of `cluster status`:*
+
+    CLUSTER                                       STATE           LAST COMMAND    LAST RUN           
+    -------------------------------------------------------------------------------------------------
+    foo_1800_20230816                             Free            SUBMIT          2023-08-16 15:44:05
+    var_3883_20230816                             Shutting Down   BOOT
+    IAmACluster_5889_20230816                     Free            SUBMIT          2023-08-16 15:42:29
+    go_gators_7764_20230816                       Free            BOOT
+    ad_merge_test_18040_20230816                  Running         SUBMIT
 
 ### Examples of comands
 
