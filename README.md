@@ -1,7 +1,6 @@
 # OneFlorida+ Cluster
 
-## Introduction
-
+======================
 The OneFlorida+ Cluster is a virtualized cluster handler that uses custom software to dynamically instantiate clusters, submit jobs to the clusters, and clean up these clusters. This software leverages a custom Docker image, Docker compose, and PySpark to create an ultra fast parallel processing system, that is fully customizable and easily automatable through a command-line interface. This system was developed by Jason Glover. <br>
 
 ## Using the Cluster
@@ -10,7 +9,7 @@ The OneFlorida+ Cluster is a virtualized cluster handler that uses custom softwa
 
 All commands to the cluster should be preceded by the keyword `cluster`.
 
-#### 1. `run`
+#### 1. run
 
 This should be the primary command send to the cluster. Calling `run` boots a cluster, submits a specified file, and then shuts down the cluster.
 
@@ -22,8 +21,8 @@ This should be the primary command send to the cluster. Calling `run` boots a cl
 
 **Syntax:**
 `cluster run [-h] [-d DATADIR] [-w WORKDIR] [-l LOG] file [args ...]`
-<br>
-#### 2. `boot`
+
+#### 2. boot
 
 Instantiate a cluster that sits in the 'FREE' state.
 
@@ -35,8 +34,8 @@ Instantiate a cluster that sits in the 'FREE' state.
 
 **Syntax:**
 cluster boot [-h] [-n NAME] [-d DATADIR] [-w WORKDIR]
-<br>
-#### 3. `submit`
+
+#### 3. submit
 
 Submit a file to a free cluster.
 
@@ -48,8 +47,8 @@ Submit a file to a free cluster.
 
 **Syntax:**
 cluster submit [-h] -s SESSIONID [-d DATADIR] [-w WORKDIR] file [args ...]
-<br>
-#### 4. `shutdown`
+
+#### 4. shutdown
 
 Shut down a specified cluster. By default, only clusters in the 'FREE' state can be shut down.
 
@@ -61,8 +60,8 @@ Shut down a specified cluster. By default, only clusters in the 'FREE' state can
 
 **Syntax:**
 cluster shutdown [-h] [-f] session_id
-<br>
-#### 5. `status`
+
+#### 5. status
 
 Display a list of the currently instantiated clusters with relevant details.
 
@@ -72,7 +71,7 @@ Display a list of the currently instantiated clusters with relevant details.
 
 **Syntax:**
 cluster status [-h]
-<br>
+
 ## Conclusion
 
 Make sure to check the syntax and use the appropriate flags for the desired operation. Understanding the core functionalities will ensure smooth operation with the cluster command-line interface.
