@@ -163,7 +163,7 @@ def spark_submit(session_id, workdir, datadir, script_name, args):
             --conf "spark.executor.memory=5g" \
             --master spark://master:7077 \
             --deploy-mode client \
-            --name my_pyspark_job /docker_app/{} {}'''.format(session_id, workdir, datadir, session_id, script_name, args)
+            --name my_pyspark_job /app/{} {}'''.format(session_id, workdir, datadir, session_id, script_name, args)
         
         #Update the status to reflect running
         stat.update_cluster(session_id, 'Running', 'SUBMIT')
