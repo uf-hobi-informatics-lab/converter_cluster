@@ -1,6 +1,5 @@
 # OneFlorida+ Cluster
 
-======================
 The OneFlorida+ Cluster is a virtualized cluster handler that uses custom software to dynamically instantiate clusters, submit jobs to the clusters, and clean up these clusters. This software leverages a custom Docker image, Docker compose, and PySpark to create an ultra fast parallel processing system, that is fully customizable and easily automatable through a command-line interface. This system was developed by Jason Glover. <br>
 
 ## Using the Cluster
@@ -20,7 +19,7 @@ This should be the primary command send to the cluster. Calling `run` boots a cl
 - `-l`: Set the desired log level. Default is 'INFO'.
 
 **Syntax:**
-`cluster run [-h] [-d DATADIR] [-w WORKDIR] [-l LOG] file [args ...]`
+```$  cluster run [-h] [-d DATADIR] [-w WORKDIR] [-l LOG] file [args ...]```
 
 #### 2. boot
 
