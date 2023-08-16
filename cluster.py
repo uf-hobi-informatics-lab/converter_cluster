@@ -104,7 +104,7 @@ services:
       - SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED=no
       - SPARK_SSL_ENABLED=no
     volumes:
-      - {}:/docker_app
+      - {}:/app
       - {}:/data
     networks:
       - pyspark_cluster_network_{}
@@ -121,8 +121,8 @@ services:
       - SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED=no
       - SPARK_SSL_ENABLED=no
     volumes:
-      - {}:/docker_app
-      - {}:/docker_data
+      - {}:/app
+      - {}:/data
     depends_on:
       - master
     networks:
@@ -153,8 +153,8 @@ def spark_submit(session_id, workdir, datadir, script_name, args):
         submit_statement= '''
             docker run \
             --network={}_pyNet \
-            -v {}:/docker_app \
-            -v {}:/docker_data \
+            -v {}:/app \
+            -v {}:/data \
             --name {}_submitter \
             --rm glove-cluster \
             /opt/bitnami/spark/bin/spark-submit \
