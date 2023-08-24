@@ -110,11 +110,11 @@ services:
       - pyspark_cluster_network_{}
 
   worker:
-    image: 'cluster-image:latest'
+    image: 'glove-cluster:latest'
     environment:
       - SPARK_MODE=worker
       - SPARK_MASTER_URL=spark://master:7077
-      - SPARK_WORKER_MEMORY=5g
+      - SPARK_WORKER_MEMORY=8g
       - SPARK_WORKER_CORES=1
       - SPARK_RPC_AUTHENTICATION_ENABLED=no
       - SPARK_RPC_ENCRYPTION_ENABLED=no
@@ -143,27 +143,45 @@ networks:
     
 
 # Build the submit statement and submit
-def spark_submit(session_id, workdir, datadir, script_name, args):
+def spark_submit(session_id, workdir, datadir, script_name, args, ali=False):
     if stat.is_valid_id(session_id)==False:
         logger.error('The requested cluster, {}, could not be found. Exiting.'.format(session_id))
         quit(-1)
     else:
         state = stat.get_state(session_id)
     if state=='Free':
-        submit_statement= '''
-            docker run \
-            --network={}_pyNet \
-            -v {}:/app \
-            -v {}:/data \
-            --name {}_submitter \
-            --rm glove-cluster \
-            /opt/bitnami/spark/bin/spark-submit \
-            --conf "spark.pyspark.python=python3" \
-            --conf "spark.driver.memory=2g" \
-            --conf "spark.executor.memory=5g" \
-            --master spark://master:7077 \
-            --deploy-mode client \
-            --name my_pyspark_job /app/{} {}'''.format(session_id, workdir, datadir, session_id, script_name, args)
+        if not ali:
+            submit_statement= '''
+                docker run \
+                --network={}_pyNet \
+                -v {}:/app \
+                -v {}:/data \
+                --name {}_submitter \
+                --rm glove-cluster \
+                /opt/bitnami/spark/bin/spark-submit \
+                --conf "spark.pyspark.python=python3" \
+                --conf "spark.driver.memory=16g" \
+                --conf "spark.executor.memory=8g" \
+                --master spark://master:7077 \
+                --deploy-mode client \
+                --name my_pyspark_job /app/{} {}'''.format(session_id, workdir, datadir, session_id, script_name, args)
+        if ali:
+            submit_statement= '''
+                docker run \
+                --network={}_pyNet \
+                -v {}:/app \
+                -v {}:/data \
+                --name {}_submitter \
+                --rm glove-cluster \
+                /opt/bitnami/spark/bin/spark-submit \
+                --conf "spark.pyspark.python=python3" \
+                --conf "spark.driver.memory=16g" \
+                --conf "spark.executor.memory=8g" \
+                --master spark://master:7077 \
+                --deploy-mode client \
+                --py-files /app/common/* \
+                --jar mssql-jdbc-driver.jar\
+                --name my_pyspark_job /app/{} {}'''.format(session_id, workdir, datadir, session_id, script_name, args)
         
         #Update the status to reflect running
         stat.update_cluster(session_id, 'Running', 'SUBMIT')
@@ -279,6 +297,11 @@ def main():
         required=False,
         help='Directory containing the scripts to be submitted to the cluster. By default, this is the directory the command was called from.'
     )
+    run_parse.add_argument(
+        '-a', '--ali',
+        action='store_true',
+        required=False,
+        help='Select separate submit statement for Ali testing')
     #run_parse.add_argument(
     #    '-c', '--cfg', 
     #    action='store_true', 
@@ -441,7 +464,10 @@ def main():
         boot_cluster(session_id, cluster_path, args.datadir, args.workdir)
 
         #Submit to cluster
-        spark_submit(session_id, args.workdir, args.datadir, args.file, arr_to_str(args.args))
+        if args.a==True:
+            spark_submit(session_id, args.workdir, args.datadir, args.file, arr_to_str(args.args), True)
+        else:
+            spark_submit(session_id, args.workdir, args.datadir, args.file, arr_to_str(args.args))
 
         #Shutdown cluster
         shutdown_cluster(session_id, cluster_path)
