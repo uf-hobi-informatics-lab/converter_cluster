@@ -23,7 +23,7 @@ The OneFlorida+ Cluster is a virtualized cluster handler that uses custom softwa
 
 ### Terminology
 
-1. `cluster`:
+1. `cluster`: A collection of nodes that processes the passed in program
 2. `node`: A component of the cluster. There are three types: Worker - processes the tasks assigned by the master node, Master/Executor - the scheduler which delegates tasks to the worker nodes, Submitter - sends the passed in script to the master node for processing
 3. `session_id`: The unique identifier of a cluster. This will always be in the format [NAME]\_[PROCESS_ID]\_[YYYYMMDD]
 4. `state`: The current status of the cluster in question. A cluster can be 'Free' - Not currently running a job, 'Running' - currently running a job, 'Booting' - The nodes and network for the cluster are being initialized, 'Shutting Down' - The hardware allocated for the nodes and network are being freed.  
@@ -46,6 +46,13 @@ This should be the primary command send to the cluster. Calling `run` boots a cl
 *Syntax:*
 
     $  cluster run [-h] [-d DATADIR] [-w WORKDIR] [-l LOG] file [args ...]
+
+> **Note**: If the file you are passing in takes its own command line args, you need to add -- before the file name and its args. 
+Ex: I want to run foo.py which takes -p as a flag.
+
+        Wrong: cluster run -d /some/path foo.py -p
+
+        Right: cluster run -d /some/path -- foo.py -p
 
 #### 2. boot
 
