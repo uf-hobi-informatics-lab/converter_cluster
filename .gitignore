@@ -3,3 +3,4 @@ clusters/
 *.log
 info/clusters.json
 info/__pycache__/*
+thoughts.txt
