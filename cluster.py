@@ -180,7 +180,7 @@ def spark_submit(session_id, workdir, datadir, script_name, args, ali=False):
                 --master spark://master:7077 \
                 --deploy-mode client \
                 --py-files /app/common/* \
-                --jar mssql-jdbc-driver.jar\
+                --jars mssql-jdbc-driver.jar\
                 --name my_pyspark_job /app/{} {}'''.format(session_id, workdir, datadir, session_id, script_name, args)
         
         #Update the status to reflect running
@@ -464,7 +464,7 @@ def main():
         boot_cluster(session_id, cluster_path, args.datadir, args.workdir)
 
         #Submit to cluster
-        if args.a==True:
+        if args.ali==True:
             spark_submit(session_id, args.workdir, args.datadir, args.file, arr_to_str(args.args), True)
         else:
             spark_submit(session_id, args.workdir, args.datadir, args.file, arr_to_str(args.args))
