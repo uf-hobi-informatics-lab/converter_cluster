@@ -47,20 +47,6 @@ absolute_cluster_path='/onefl_cluster'
 
 logger = logging.getLogger()
 
-valid_partners = {'AVH', 
-    'BND',
-    'CHM',
-    'CHR',
-    'EMY',
-    'NCH',
-    'ORL',
-    'TMA',
-    'TMC',
-    'UAB',
-    'UFH',
-    'UMI',
-    'USF'}
-
 valid_log_levels = {
     'DEBUG':logging.DEBUG,  
     'INFO':logging.INFO,
