@@ -8,7 +8,7 @@ The OneFlorida+ Cluster is a virtualized cluster handler that uses custom softwa
 > **Note**: This package assumes the repo will be cloned in the root. If you decide to install the package in a different spot, the package will have to be refactored accordingly.
 2. In this location, clone the repo by calling 
         
-        git clone https://bitbucket.bmi.program.ufl.edu/scm/conv/onefl_cluster.git
+        git clone https://github.com/uf-hobi-informatics-lab/converter_cluster.git
 3. Navigate into the repo with `cd /onefl_cluster` and run 
 
         sudo python3 install.py
