@@ -18,6 +18,11 @@ else:
     print("Failed to change permissions for /onefl_cluster.")
 
 # Building docker image
+if run_command('gzip -d /onefl_cluster/image_files/glove_cluster.tar.gz') == 0:
+    print('Succesfully unpacked the Docker image.')
+else:
+    print('Failed to unzip the Docker image.')
+
 if run_command('docker load -i /onefl_cluster/image_files/glove_cluster.tar') == 0:
     print("Built Docker image successfully.")
 else:
@@ -41,6 +46,20 @@ data = {
 try:
     with open('/onefl_cluster/info/clusters.json', 'w') as file:
         json.dump(data, file)
-    print("Wrote JSON data to /onefl_cluster/info/clusters.json successfully.")
+    print("Initialized the cluster status JSON at /onefl_cluster/info/clusters.json successfully.")
 except Exception as e:
     print(f"Failed to write to /onefl_cluster/info/clusters.json. Error: {e}")
+
+
+
+while True:
+    response = input('Would you like to run a test script to verify installation? (Y/n)')
+
+    if response.lower()=='y' or response.lower()=='yes':
+        run_command('cluster run /onefl_cluster/verify_cluster.py')
+        quit(0)
+    if response.lower()=='n' or response.lower()=='no':
+        print('Goodbye!')
+        quit(0)
+    else:
+        print('Invalid response! Please enter yes or no')
