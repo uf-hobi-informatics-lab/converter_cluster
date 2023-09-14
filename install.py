@@ -19,6 +19,9 @@ if run_command('sudo chmod -R 777 {}'.format(install_path)) == 0:
 else:
     print("Failed to change permissions for {}.")
 
+
+
+
 # Building docker image
 if run_command('gzip -d {}/image_files/onefl-cluster-image.tar.gz'.format(install_path)) == 0:
     print('Succesfully unpacked the Docker image.')
@@ -44,6 +47,22 @@ data = {
         "last_command": "none"
     }
 }
+
+try:
+    with open('cluster.py', 'r') as file:
+        lines = file.readlines()
+        
+    with open('cluster.py', 'w') as file:
+        for line in lines:
+            if line.strip() == "absolute_cluster_path='[CHANGE ME]'":
+                file.write("absolute_cluster_path='{}'\n".format(install_path))
+            else:
+                    file.write(line)
+except FileNotFoundError:
+        print("File 'cluster.py' not found!")
+except Exception as e:
+        print(f"An error occurred: {e}")
+print("Succesfully updated the path in 'cluster.py'")
 
 try:
     with open('{}/info/clusters.json'.format(install_path), 'w') as file:
