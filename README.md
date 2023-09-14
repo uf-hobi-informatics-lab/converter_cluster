@@ -4,16 +4,16 @@ The OneFlorida+ Cluster is a virtualized cluster handler that uses custom softwa
 
 ## Installing the cluster
 
-1. Navigate to the desired install path on the system. For the rest of the documentation, we call this `$INSTALL_PATH`
+1. Navigate to the desired install path on the system. For the rest of the documentation, we call this `$INSTALL_PATH`.
 2. In this location, clone the repo by calling 
         
         git clone https://github.com/uf-hobi-informatics-lab/converter_cluster.git
 3. User will have received the custom image `onefl-cluster-image.tar.gz` through OneFlorida+ directly. Copy this file to `$INSTALL_PATH/converter_cluser/image_files/`.
 3. From there, `cd` into the repo with `cd $INSTALL_PATH/converter_cluster` and run 
 
-        sudo python3 install.py
+        python3 install.py
 > **Note**: This script assumes you have Docker installed. Please install Docker first if you have not already.
-> **Note**: 'sudo' permissions are used to ensure that calling 'chmod' on the repo is allowed.
+> **Note**: User will be prompted for password to use 'sudo'. Admin permissions are used to ensure that calling 'chmod' on the repo is allowed.
 4. You can verify that everything has been installed correctly by using the `verify_cluster.py` script, located at the top level of the repo. The install script will ask if you want to run this after installation or in the top level of the repo, run
 
         cluster run verify_cluster.py

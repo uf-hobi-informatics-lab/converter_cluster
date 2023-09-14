@@ -13,11 +13,17 @@ def run_command(command):
         print(f"Failure: {command}")
     return result
 
+#Create the clusters directory
+if run_command('mkdir {}/clusters'.format(install_path)) == 0:
+    print("Created the clusters directory successfully.".format(install_path))
+else:
+    print("Failed to create the clusters directory.")
+
 # Changing permissions
 if run_command('sudo chmod -R 777 {}'.format(install_path)) == 0:
     print("Changed permissions for {} successfully.".format(install_path))
 else:
-    print("Failed to change permissions for {}.")
+    print("Failed to change permissions for {}.".format(install_path))
 
 
 
