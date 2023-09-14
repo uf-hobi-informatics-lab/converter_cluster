@@ -8,13 +8,13 @@ The OneFlorida+ Cluster is a virtualized cluster handler that uses custom softwa
 2. In this location, clone the repo by calling 
         
         git clone https://github.com/uf-hobi-informatics-lab/converter_cluster.git
-3. User will have received the custom image `onefl-cluster-image.tar.gz` through OneFlorida+ directly. Copy this file to `$INSTALL_PATH/converter_cluser/image_files/`.
+3. User will have received the custom image `onefl-cluster-image.tar` through OneFlorida+ directly. Copy this file to `$INSTALL_PATH/converter_cluser/image_files/`.
 3. From there, `cd` into the repo with `cd $INSTALL_PATH/converter_cluster` and run 
 
         python3 install.py
 > **Note**: This script assumes you have Docker installed. Please install Docker first if you have not already.
 > **Note**: User will be prompted for password to use 'sudo'. Admin permissions are used to ensure that calling 'chmod' on the repo is allowed.
-4. You can verify that everything has been installed correctly by using the `verify_cluster.py` script, located at the top level of the repo. The install script will ask if you want to run this after installation or in the top level of the repo, run
+4. You can verify that everything has been installed correctly by using the `verify_cluster.py` script, located at the top level of the repo. From here, run
 
         cluster run verify_cluster.py
     The script has run correctly if in the output there is a line that reads 'Cluster is running as expected.'
@@ -34,7 +34,7 @@ All commands to the cluster should be preceded by the keyword `cluster`.
 
 #### 1. run
 
-This should be the primary command send to the cluster. Calling `run` boots a cluster, submits a specified file, and then shuts down the cluster. This command requires a file for input and takes in any args that file may have. Since a file must be passed in for this command, the cluster will be named after the passed in file name.
+This should be the primary command sent to the cluster. Calling `run` boots a cluster, submits a specified file, and then shuts down the cluster. This command requires a file for input and takes in any args that file may have. Since a file must be passed in for this command, the cluster will be named after the passed in file name.
 
 *Accepted Flags:*
 

@@ -16,6 +16,6 @@ if __name__ == '__main__':
     count = spark.sparkContext.parallelize(range(0, num_samples), num_partitions).filter(inside).count()
     pi = 4.0 * count / num_samples
 
-    print("Cluster is running as expected.")
+    print("\n\n\nCluster is running as expected.\n\n\n")
 
     spark.stop()
