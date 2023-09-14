@@ -3,6 +3,7 @@
 The OneFlorida+ Cluster is a virtualized cluster handler that uses custom software to dynamically instantiate clusters, submit jobs to the clusters, and clean up these clusters. This software leverages a custom Docker image, Docker compose, and PySpark to create an ultra fast parallel processing system, that is fully customizable and easily automatable through a command-line interface. This system was developed by Jason Glover. <br>
 
 ## Installing the cluster
+PREREQUISITES FOR INSTALLATION: This package has only been tested on Linux and Unix based systems. THIS PACKAGE WILL NOT WORK ON WINDOWS. Docker is required for this package to run correctly. If encountering Docker realted issues with Docker installed, ensure the daemon is running.
 
 1. Navigate to the desired install path on the system. For the rest of the documentation, we call this `$INSTALL_PATH`.
 2. In this location, clone the repo by calling 
@@ -12,7 +13,6 @@ The OneFlorida+ Cluster is a virtualized cluster handler that uses custom softwa
 3. From there, `cd` into the repo with `cd $INSTALL_PATH/converter_cluster` and run 
 
         python3 install.py
-> **Note**: This script assumes you have Docker installed. Please install Docker first if you have not already.
 > **Note**: User will be prompted for password to use 'sudo'. Admin permissions are used to ensure that calling 'chmod' on the repo is allowed.
 4. You can verify that everything has been installed correctly by using the `verify_cluster.py` script, located at the top level of the repo. From here, run
 
