@@ -1,6 +1,6 @@
 import json
 
-json_path = '/converter_cluster/info/clusters.json'
+json_path = '[CHANGE ME]'
 
 def add_cluster(session_id, state, last_command, last_run_time=''):
     #Add a cluster to the status list

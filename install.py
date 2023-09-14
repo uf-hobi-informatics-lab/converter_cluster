@@ -54,11 +54,13 @@ data = {
     }
 }
 
+
+#Update the hardcoded paths
 try:
-    with open('cluster.py', 'r') as file:
+    with open('{}/cluster.py'.format(install_path), 'r') as file:
         lines = file.readlines()
         
-    with open('cluster.py', 'w') as file:
+    with open('{}/cluster.py'.format(install_path), 'w') as file:
         for line in lines:
             if line.strip() == "absolute_cluster_path='[CHANGE ME]'":
                 file.write("absolute_cluster_path='{}'\n".format(install_path))
@@ -71,6 +73,23 @@ except Exception as e:
 print("Succesfully updated the path in 'cluster.py'")
 
 try:
+    with open('{}/info/cluster_status.py'.format(install_path), 'r') as file:
+        lines = file.readlines()
+        
+    with open('{}/info/cluster_status.py'.format(install_path), 'w') as file:
+        for line in lines:
+            if line.strip() == "json_path = '[CHANGE ME]'":
+                file.write("json_path = '{}/info/clusters.json'\n".format(install_path))
+            else:
+                    file.write(line)
+except FileNotFoundError:
+        print("File 'info/cluster_status.py' not found!")
+except Exception as e:
+        print(f"An error occurred: {e}")
+print("Succesfully updated the path in 'cluster.py'")
+
+#Create the cluster json
+try:
     with open('{}/info/clusters.json'.format(install_path), 'w') as file:
         json.dump(data, file)
     print("Initialized the cluster status JSON at {}/info/clusters.json successfully.".format(install_path))
@@ -79,15 +98,4 @@ except Exception as e:
 
 
 
-while True:
-    response = input('Would you like to run a test script to verify installation? (Y/n)')
-
-    if response.lower()=='y' or response.lower()=='yes':
-        run_command('cluster run {}/verify_cluster.py'.format(install_path))
-        quit(0)
-    if response.lower()=='n' or response.lower()=='no':
-        print('Goodbye!')
-        quit(0)
-    else:
-        print('Invalid response! Please enter yes or no')
         
