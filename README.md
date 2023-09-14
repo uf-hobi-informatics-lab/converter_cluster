@@ -121,9 +121,6 @@ Display a list of the currently instantiated clusters with relevant details.
     go_gators_7764_20230816                       Free            BOOT
     ad_merge_test_18040_20230816                  Running         SUBMIT
 
-### Examples of comands
-
-Let's assume we are working with a file called `foo.py` that takes args `arg1`, `arg2`, `arg3` and our cluster has `session_id`: var_12345_20230816
 
 
 ## Developing for the Cluster
