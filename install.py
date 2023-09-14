@@ -12,24 +12,24 @@ def run_command(command):
     return result
 
 # Changing permissions
-if run_command('sudo chmod -R 777 /onefl_cluster') == 0:
-    print("Changed permissions for /onefl_cluster successfully.")
+if run_command('sudo chmod -R 777 /converter_cluster') == 0:
+    print("Changed permissions for /converter_cluster successfully.")
 else:
-    print("Failed to change permissions for /onefl_cluster.")
+    print("Failed to change permissions for /converter_cluster.")
 
 # Building docker image
-if run_command('gzip -d /onefl_cluster/image_files/glove_cluster.tar.gz') == 0:
+if run_command('gzip -d /converter_cluster/image_files/glove_cluster.tar.gz') == 0:
     print('Succesfully unpacked the Docker image.')
 else:
     print('Failed to unzip the Docker image.')
 
-if run_command('docker load -i /onefl_cluster/image_files/glove_cluster.tar') == 0:
+if run_command('docker load -i /converter_cluster/image_files/glove_cluster.tar') == 0:
     print("Built Docker image successfully.")
 else:
     print("Failed to build Docker image.")
 
 # Creating symlink
-if run_command('ln -s /onefl_cluster/cluster.py /usr/local/bin/cluster') == 0:
+if run_command('ln -s /converter_cluster/cluster.py /usr/local/bin/cluster') == 0:
     print("Created symlink successfully.")
 else:
     print("Failed to create symlink.")
@@ -44,11 +44,11 @@ data = {
 }
 
 try:
-    with open('/onefl_cluster/info/clusters.json', 'w') as file:
+    with open('/converter_cluster/info/clusters.json', 'w') as file:
         json.dump(data, file)
-    print("Initialized the cluster status JSON at /onefl_cluster/info/clusters.json successfully.")
+    print("Initialized the cluster status JSON at /converter_cluster/info/clusters.json successfully.")
 except Exception as e:
-    print(f"Failed to write to /onefl_cluster/info/clusters.json. Error: {e}")
+    print(f"Failed to write to /converter_cluster/info/clusters.json. Error: {e}")
 
 
 
@@ -56,10 +56,11 @@ while True:
     response = input('Would you like to run a test script to verify installation? (Y/n)')
 
     if response.lower()=='y' or response.lower()=='yes':
-        run_command('cluster run /onefl_cluster/verify_cluster.py')
+        run_command('cluster run /converter_cluster/verify_cluster.py')
         quit(0)
     if response.lower()=='n' or response.lower()=='no':
         print('Goodbye!')
         quit(0)
     else:
         print('Invalid response! Please enter yes or no')
+        

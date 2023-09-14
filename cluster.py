@@ -43,7 +43,7 @@ ascii_art='''
                                                                                                        
 '''
 
-absolute_cluster_path='/onefl_cluster'
+absolute_cluster_path='/converter_cluster'
 
 logger = logging.getLogger()
 

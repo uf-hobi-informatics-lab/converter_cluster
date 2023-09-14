@@ -9,7 +9,8 @@ The OneFlorida+ Cluster is a virtualized cluster handler that uses custom softwa
 2. In this location, clone the repo by calling 
         
         git clone https://github.com/uf-hobi-informatics-lab/converter_cluster.git
-3. Navigate into the repo with `cd /onefl_cluster` and run 
+3. User will have received the custom image through OneFlorida+ directly. Copy this file to `/converter_cluser/image_files/`.
+3. Navigate into the repo with `cd /converter_cluster` and run 
 
         sudo python3 install.py
 > **Note**: This script assumes you have Docker installed. Please install Docker first if you have not already.
