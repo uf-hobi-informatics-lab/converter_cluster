@@ -82,7 +82,7 @@ version: "3.8"
 
 services:
   master:
-    image: 'glove-cluster:latest'
+    image: 'onefl-cluster-image:latest'
     environment:
       - SPARK_MODE=master
       - SPARK_RPC_AUTHENTICATION_ENABLED=no
@@ -96,7 +96,7 @@ services:
       - pyspark_cluster_network_{}
 
   worker:
-    image: 'glove-cluster:latest'
+    image: 'onefl-cluster-image:latest'
     environment:
       - SPARK_MODE=worker
       - SPARK_MASTER_URL=spark://master:7077
@@ -143,7 +143,7 @@ def spark_submit(session_id, workdir, datadir, script_name, args, ali=False):
                 -v {}:/app \
                 -v {}:/data \
                 --name {}_submitter \
-                --rm glove-cluster \
+                --rm onefl-cluster-image \
                 /opt/bitnami/spark/bin/spark-submit \
                 --conf "spark.pyspark.python=python3" \
                 --conf "spark.driver.memory=16g" \
@@ -158,7 +158,7 @@ def spark_submit(session_id, workdir, datadir, script_name, args, ali=False):
                 -v {}:/app \
                 -v {}:/data \
                 --name {}_submitter \
-                --rm glove-cluster \
+                --rm onefl-cluster-image \
                 /opt/bitnami/spark/bin/spark-submit \
                 --conf "spark.pyspark.python=python3" \
                 --conf "spark.driver.memory=16g" \
