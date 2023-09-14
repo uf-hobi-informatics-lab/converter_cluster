@@ -3,7 +3,7 @@
 The OneFlorida+ Cluster is a virtualized cluster handler that uses custom software to dynamically instantiate clusters, submit jobs to the clusters, and clean up these clusters. This software leverages a custom Docker image, Docker compose, and PySpark to create an ultra fast parallel processing system, that is fully customizable and easily automatable through a command-line interface. This system was developed by Jason Glover. <br>
 
 ## Installing the cluster
-PREREQUISITES FOR INSTALLATION: This package has only been tested on Linux and Unix based systems. THIS PACKAGE WILL NOT WORK ON WINDOWS. Docker is required for this package to run correctly. If encountering Docker realted issues with Docker installed, ensure the daemon is running.
+PREREQUISITES FOR INSTALLATION: This package has only been tested on Linux and Unix based systems. THIS PACKAGE WILL NOT WORK ON WINDOWS. Docker is required for this package to run correctly. If encountering Docker related issues with Docker installed, ensure the daemon is running.
 
 1. Navigate to the desired install path on the system. For the rest of the documentation, we call this `$INSTALL_PATH`.
 2. In this location, clone the repo by calling 
@@ -132,5 +132,5 @@ Display a list of the currently instantiated clusters with relevant details.
 ## Author
 
 Jason Glover <br>
-Contact: jasonglover@ufl.edu <br>
+Contact: jasonglover [at] ufl [dot] edu <br>
 Last Updated: 09/01/2023
