@@ -20,12 +20,12 @@ else:
     print("Failed to change permissions for {}.")
 
 # Building docker image
-if run_command('gzip -d {}/image_files/glove_cluster.tar.gz'.format(install_path)) == 0:
+if run_command('gzip -d {}/image_files/onefl-cluster-image.tar.gz'.format(install_path)) == 0:
     print('Succesfully unpacked the Docker image.')
 else:
     print('Failed to unzip the Docker image.')
 
-if run_command('docker load -i {}/image_files/glove_cluster.tar'.format(install_path)) == 0:
+if run_command('docker load -i {}/image_files/onefl-cluster-image.tar'.format(install_path)) == 0:
     print("Built Docker image successfully.")
 else:
     print("Failed to build Docker image.")
