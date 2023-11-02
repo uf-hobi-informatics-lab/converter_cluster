@@ -27,6 +27,8 @@ import os
 import logging
 import time
 import math
+import pwd
+import json
 import info.cluster_status as stat
 from datetime import timedelta
 from datetime import datetime
@@ -76,6 +78,15 @@ def set_session_id(file):
 
 def make_cluster(session_id, cluster_path, datadir, workdir):
     #Dynamically build the docker compose file on boot with appropriate mount dirs
+
+    #Get the desired worker memory allocation
+    with open('hardware_config.json','r') as f:
+        memory = json.load(f)
+    worker_mem = memory['hardware']['memory_worker']
+    master_mem = memory['hardware']['memory_master']
+
+
+
     #The text variable looks this way because .yml files are super picky about white space so the formatting of this string has to be precise
     text = '''
 version: "3.8"
@@ -83,6 +94,7 @@ version: "3.8"
 services:
   master:
     image: 'onefl-cluster-image:latest'
+    mem_limit: {}
     environment:
       - SPARK_MODE=master
       - SPARK_RPC_AUTHENTICATION_ENABLED=no
@@ -97,10 +109,11 @@ services:
 
   worker:
     image: 'onefl-cluster-image:latest'
+    mem_limit: {}
     environment:
       - SPARK_MODE=worker
       - SPARK_MASTER_URL=spark://master:7077
-      - SPARK_WORKER_MEMORY=8g
+      - SPARK_WORKER_MEMORY={}
       - SPARK_WORKER_CORES=1
       - SPARK_RPC_AUTHENTICATION_ENABLED=no
       - SPARK_RPC_ENCRYPTION_ENABLED=no
@@ -117,7 +130,7 @@ services:
 networks:
     pyspark_cluster_network_{}:
         name: {}_pyNet
-'''.format(workdir,datadir,session_id,workdir,datadir,session_id,session_id,session_id)
+'''.format(master_mem,workdir,datadir,session_id,worker_mem, worker_mem,workdir,datadir,session_id,session_id,session_id)
     
     cf = open(cluster_path, 'w')
     num_written = cf.write(text) 
@@ -130,6 +143,13 @@ networks:
 
 # Build the submit statement and submit
 def spark_submit(session_id, workdir, datadir, script_name, args, ali=False):
+
+    #Get the desired worker memory allocation
+    with open('hardware_config.json','r') as f:
+        memory = json.load(f)
+    worker_mem = memory['hardware']['memory_worker']
+    master_mem = memory['hardware']['memory_master']
+
     if stat.is_valid_id(session_id)==False:
         logger.error('The requested cluster, {}, could not be found. Exiting.'.format(session_id))
         quit(-1)
@@ -139,6 +159,7 @@ def spark_submit(session_id, workdir, datadir, script_name, args, ali=False):
         if not ali:
             submit_statement= '''
                 docker run \
+                --memory=500m \
                 --network={}_pyNet \
                 -v {}:/app \
                 -v {}:/data \
@@ -146,14 +167,15 @@ def spark_submit(session_id, workdir, datadir, script_name, args, ali=False):
                 --rm onefl-cluster-image \
                 /opt/bitnami/spark/bin/spark-submit \
                 --conf "spark.pyspark.python=python3" \
-                --conf "spark.driver.memory=16g" \
-                --conf "spark.executor.memory=8g" \
+                --conf "spark.driver.memory={}" \
+                --conf "spark.executor.memory={}" \
                 --master spark://master:7077 \
                 --deploy-mode client \
-                --name my_pyspark_job /app/{} {}'''.format(session_id, workdir, datadir, session_id, script_name, args)
+                --name my_pyspark_job /app/{} {}'''.format(session_id, workdir, datadir, session_id, master_mem, worker_mem, script_name, args)
         if ali:
             submit_statement= '''
                 docker run \
+                --memory=500m \
                 --network={}_pyNet \
                 -v {}:/app \
                 -v {}:/data \
@@ -161,13 +183,13 @@ def spark_submit(session_id, workdir, datadir, script_name, args, ali=False):
                 --rm onefl-cluster-image \
                 /opt/bitnami/spark/bin/spark-submit \
                 --conf "spark.pyspark.python=python3" \
-                --conf "spark.driver.memory=16g" \
-                --conf "spark.executor.memory=8g" \
+                --conf "spark.driver.memory={}" \
+                --conf "spark.executor.memory={}" \
                 --master spark://master:7077 \
                 --deploy-mode client \
                 --py-files /app/common/* \
                 --jars mssql-jdbc-driver.jar\
-                --name my_pyspark_job /app/{} {}'''.format(session_id, workdir, datadir, session_id, script_name, args)
+                --name my_pyspark_job /app/{} {}'''.format(session_id, workdir, datadir, session_id, master_mem, worker_mem, script_name, args)
         
         #Update the status to reflect running
         stat.update_cluster(session_id, 'Running', 'SUBMIT')
@@ -182,14 +204,15 @@ def spark_submit(session_id, workdir, datadir, script_name, args, ali=False):
         logger.error("Cannot submit job to {}. Cluster is currently {}. Exiting".format(session_id,state.lower()))
         quit(-1)
 
-def boot_cluster(session_id, cluster_path, datadir, workdir):
+def boot_cluster(session_id, cluster_path, username, datadir, workdir):
+
     #Create the session's cluster
     logger.info('Creating the cluster directory for {}'.format(session_id))
     make_cluster(session_id, cluster_path, datadir, workdir)
 
     #boot up the cluster
     logger.info('Booting the cluster for {}'.format(session_id))
-    stat.add_cluster(session_id, 'Booting', 'BOOT')
+    stat.add_cluster(session_id, 'Booting', 'BOOT', username)
     os.system('docker compose -f {} up -d --scale worker=5'.format(cluster_path))
 
     #Update the cluster status
@@ -233,13 +256,23 @@ def shutdown_cluster(session_id, cluster_path, override=False):
         stat.remove_cluster(session_id)
         
 
+def update_hardware(node_type, value):
+    #Utility function for updating the memory allocationg config of the cluster using the 'set' command
+    with open('hardware_config.json','r') as f:
+        hardware = json.load(f)
+    if node_type=='master':
+        hardware['hardware']['memory_master'] = '{}g'.format(str(value))
+    if node_type=='worker':
+        hardware['hardware']['memory_worker'] = '{}g'.format(str(value))
+    with open('hardware_config.json', 'w') as f:
+        json.dump(hardware, f)
+
 def main():
     
     
-    
-    #Pull user's id for config operations
-    #uid = os.getuid()
-
+    #Get username calling the script for status (Implementation pulled from ChatGPT)
+    user_id = os.geteuid()
+    username = pwd.getpwuid(user_id).pw_name
 
 ####################################################
 #                                                  #
@@ -374,6 +407,21 @@ def main():
     
 #========== END OF STATUS_PARSE ==========
 
+#========== HARDWARE_CONFIG_PARSE ===========
+    config_parse = subparsers.add_parser('set', help='Command for adjusting the memory allocation of the master and worker nodes')
+    sub_config_parse = config_parse.add_subparsers(dest='subcommand')
+
+    master = sub_config_parse.add_parser('master', help='Denote the master node for memory allocation')
+    master.add_argument('value', type=str,default='', help='An integer value for the number of gigabytes of memory to allocate to the master node')
+
+    worker = sub_config_parse.add_parser('worker', help='Denote the worker node for memory allocation')
+    worker.add_argument('value', type=str,default='', help='An integer value for the number of gigabytes of memory to allocate to the worker nodes')
+
+    default = sub_config_parse.add_parser('default', help='Reset the memory allocation of the cluster to default parameters')
+
+
+#========== END OF HARDWARE_CONFIG_PARSE
+
     # Parse the arguments
     args = parser.parse_args()
 ####################################################
@@ -384,10 +432,10 @@ def main():
 #          Set environment configuration           #
 #                                                  #                                                  
 ####################################################
-
 #========= VARIABLES =======
-    if args.command!='status':
+    if args.command!='status' and args.command!='set':
         #We need to filter the status command out because session_id is not created for it, plus we don't need logging for status
+        #Same for the set command
         if args.command=='run':
             session_id = set_session_id(args.file)
         elif args.command=='boot':
@@ -402,7 +450,7 @@ def main():
 
 #========= LOGGING =========
     #Create logger and set the logger configuration
-    if args.command!='status':
+    if args.command!='status' and args.command!='set':
         #Same as variables
         if args.command=='run':
             log_level = args.log.upper()
@@ -434,6 +482,10 @@ def main():
 
     # Check what command was given
     if args.command == 'run':
+        with open('hardware_config.json','r') as f:
+            memory = json.load(f)
+        worker_mem = memory['hardware']['memory_worker']
+        master_mem = memory['hardware']['memory_master']
         print(ascii_art)
         
         #Write cluster settings to the log
@@ -443,11 +495,14 @@ def main():
         logger.info("Work Dir: {}".format(args.workdir))
         logger.info("File: {}".format(args.file))
         logger.info("Args: {}".format(args.args))
+        logger.info("Master memory: {}".format(master_mem))
+        logger.info("Worker memory: {}".format(worker_mem))
+        
 
        
         #Boot Cluster
         start = time.time()
-        boot_cluster(session_id, cluster_path, args.datadir, args.workdir)
+        boot_cluster(session_id, cluster_path, username, args.datadir, args.workdir)
 
         #Submit to cluster
         if args.ali==True:
@@ -467,7 +522,7 @@ def main():
         logger.info('Processed finished in {}'.format(formatted_time))
     
     if args.command=='boot':
-        boot_cluster(session_id, cluster_path, args.datadir, args.workdir)
+        boot_cluster(session_id, cluster_path, username, args.datadir, args.workdir)
 
     if args.command=='submit':
         logger.info('Submitting job {} to cluster with session ID: {}'.format(args.file, session_id))
@@ -484,6 +539,40 @@ def main():
     if args.command=='status':
         stat.print_status()
 
+    if args.command=='set':
+        if args.subcommand=='master':
+            amt_mem = -1
+            try:
+                amt_mem = int(args.value)
+            except Exception as e:
+                print("ERROR: Please enter an integer value.")
 
+            if amt_mem==-1:
+                quit(-1)
+            elif amt_mem >= 8:
+                print('Woah there! That\'s a lot of memory you\'re allocating. The master node should never be allocated more than 8gb of memory. Try again.')
+                quit()
+            else:
+                update_hardware('master',amt_mem)
+
+        elif args.subcommand=='worker':
+            amt_mem = -1
+            try:
+                amt_mem = int(args.value)
+            except Exception as e:
+                print("ERROR: Please enter an integer value.")
+
+            if amt_mem==-1:
+                quit(-1)
+            elif amt_mem >= 16:
+                print('Woah there! That\'s a lot of memory you\'re allocating. Remember that 5 workers are instantiated at a time, so you\'re actually allocating {} gb of memory to the cluster. Try again.'.format(str(amt_mem*5)))
+                quit()
+            else:
+                update_hardware('worker',amt_mem)
+        elif args.subcommand=='default':
+            update_hardware('master', 1)
+            update_hardware('worker', 5)
+        else:
+            print('yuh wrong!')
 if __name__=='__main__':
     main()
