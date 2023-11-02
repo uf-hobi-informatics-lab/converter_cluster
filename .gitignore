@@ -3,4 +3,6 @@ clusters/
 *.log
 info/clusters.json
 info/__pycache__/*
+info/__pycache__
+hardware_config.json
 thoughts.txt
