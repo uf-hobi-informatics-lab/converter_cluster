@@ -2,19 +2,20 @@ import json
 
 json_path = '[CHANGE ME]'
 
-def add_cluster(session_id, state, last_command, last_run_time=''):
+def add_cluster(session_id, state, last_command, username, last_run_time=''):
     #Add a cluster to the status list
     with open(json_path, 'r') as f:
         clusters = json.load(f)
     clusters[session_id] = {
         'state': state,
         'last_command': last_command,
+        'user': username,
         'last_run_time': last_run_time
     }
     with open(json_path, 'w') as f:
         json.dump(clusters, f)
 
-def update_cluster(session_id, state=None, last_command=None, last_run_time=None):
+def update_cluster(session_id, state=None, last_command=None, username=None, last_run_time=None):
     #Update a cluster in the status list
     #Set default values to None - if user wants to update only one of these values, then it will not be None valued
     with open(json_path, 'r') as f:
@@ -23,6 +24,8 @@ def update_cluster(session_id, state=None, last_command=None, last_run_time=None
         clusters[session_id]['state'] = state
     if last_command != None:
         clusters[session_id]['last_command'] = last_command
+    if username!=None:
+        clusters[session_id]['user'] = username
     if last_run_time != None:
         clusters[session_id]['last_run_time'] = last_run_time
     with open(json_path, 'w') as f:
@@ -46,7 +49,7 @@ def print_status():
     with open(json_path, 'r') as f:
         clusters = json.load(f)
 
-    header = f"{'CLUSTER':<45} {'STATE':<15} {'LAST COMMAND':<15} {'LAST RUN':<19}"
+    header = f"{'CLUSTER':<50} {'STATE':<15} {'LAST COMMAND':<15} {'CALLED BY':<20} {'LAST RUN':<19}"
     print(header)
     print('-'*len(header))  # Divider line
 
@@ -55,9 +58,10 @@ def print_status():
         if cluster != 'dummy_cluster':    
             state = info['state']
             last_command = info['last_command']
+            user = info['user']
             last_run_time = info['last_run_time']
             
-            row = f"{cluster:<45} {state:<15} {last_command:<15} {last_run_time:<19}"
+            row = f"{cluster:<50} {state:<15} {last_command:<15} {user:<20} {last_run_time:<19}"
             print(row)
 
 def get_state(session_id):
