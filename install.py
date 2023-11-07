@@ -65,8 +65,8 @@ try:
         
     with open('{}/info/cluster_status.py'.format(install_path), 'w') as file:
         for line in lines:
-            if line.strip() == "json_path = '[CHANGE ME]'":
-                file.write("json_path = '{}/info/clusters.json'\n".format(install_path))
+            if line.strip() == "info_path = '[CHANGE ME]'":
+                file.write("info_path = '{}/info/'\n".format(install_path))
             else:
                     file.write(line)
 except FileNotFoundError:

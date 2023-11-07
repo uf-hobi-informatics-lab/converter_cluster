@@ -1,25 +1,39 @@
 import json
+from filelock import SoftFileLock
+#Need file locks to prevent race conditions
 
-json_path = '[CHANGE ME]'
+info_path = '/Users/jasonglover/Documents/Code/test_cluster/info/'
+
+json_path = info_path + 'clusters.json'
+lock_path = info_path + 'clusters.lock'
+
 
 def add_cluster(session_id, state, last_command, username, last_run_time=''):
-    #Add a cluster to the status list
-    with open(json_path, 'r') as f:
-        clusters = json.load(f)
+    
+    with SoftFileLock(lock_path, timeout=10):
+        #Add a cluster to the status list
+        with open(json_path, 'r') as f:
+            clusters = json.load(f)
+
     clusters[session_id] = {
         'state': state,
         'last_command': last_command,
         'user': username,
         'last_run_time': last_run_time
     }
-    with open(json_path, 'w') as f:
-        json.dump(clusters, f)
+
+    with SoftFileLock(lock_path, timeout=10):    
+        with open(json_path, 'w') as f:
+            json.dump(clusters, f)
 
 def update_cluster(session_id, state=None, last_command=None, username=None, last_run_time=None):
     #Update a cluster in the status list
     #Set default values to None - if user wants to update only one of these values, then it will not be None valued
-    with open(json_path, 'r') as f:
-        clusters = json.load(f)
+
+    with SoftFileLock(lock_path, timeout=10):
+        with open(json_path, 'r') as f:
+            clusters = json.load(f)
+
     if state != None:
         clusters[session_id]['state'] = state
     if last_command != None:
@@ -28,26 +42,32 @@ def update_cluster(session_id, state=None, last_command=None, username=None, las
         clusters[session_id]['user'] = username
     if last_run_time != None:
         clusters[session_id]['last_run_time'] = last_run_time
-    with open(json_path, 'w') as f:
-        json.dump(clusters, f)
+
+    with SoftFileLock(lock_path, timeout=10):
+        with open(json_path, 'w') as f:
+            json.dump(clusters, f)
 
 def remove_cluster(session_id):
     # Load the data from the JSON file
-    with open(json_path, 'r') as f:
-        clusters = json.load(f)
-    
-    # Remove the cluster, if it exists
+
+    with SoftFileLock(lock_path, timeout=10):
+        with open(json_path, 'r') as f:
+            clusters = json.load(f)
+        
+        # Remove the cluster, if it exists
     if session_id in clusters:
         del clusters[session_id]
 
     # Write the updated data back to the JSON file
-    with open(json_path, 'w') as f:
-        json.dump(clusters, f)
+    with SoftFileLock(lock_path, timeout=10):
+        with open(json_path, 'w') as f:
+            json.dump(clusters, f)
 
 def print_status():
     #Print the info held in the status list
-    with open(json_path, 'r') as f:
-        clusters = json.load(f)
+    with SoftFileLock(lock_path, timeout=10):
+        with open(json_path, 'r') as f:
+            clusters = json.load(f)
 
     header = f"{'CLUSTER':<50} {'STATE':<15} {'LAST COMMAND':<15} {'CALLED BY':<20} {'LAST RUN':<19}"
     print(header)
@@ -65,23 +85,27 @@ def print_status():
             print(row)
 
 def get_state(session_id):
-    with open(json_path, 'r') as f:
-        clusters = json.load(f)
+    with SoftFileLock(lock_path, timeout=10):
+        with open(json_path, 'r') as f:
+            clusters = json.load(f)
     return clusters[session_id]['state']
 
 def get_last_command(session_id):
-    with open(json_path, 'r') as f:
-        clusters = json.load(f)
+    with SoftFileLock(lock_path, timeout=10):
+        with open(json_path, 'r') as f:
+            clusters = json.load(f)
     return clusters[session_id]['last_command']
 
 def get_last_run_time(session_id):
-    with open(json_path, 'r') as f:
-        clusters = json.load(f)
+    with SoftFileLock(lock_path, timeout=10):
+        with open(json_path, 'r') as f:
+            clusters = json.load(f)
     return clusters[session_id]['last_run_time']
 
 def is_valid_id(session_id):
-    with open(json_path, 'r') as f:
-        clusters = json.load(f)
+    with SoftFileLock(lock_path, timeout=10):
+        with open(json_path, 'r') as f:
+            clusters = json.load(f)
     try:
         _ = clusters[session_id]
         return True
