@@ -34,6 +34,14 @@ from datetime import timedelta
 from datetime import datetime
 
 
+#============ MEMORY ALLOCATION PARAMETERS ============
+MAX_MASTER_MEM = 8
+MAX_WORKER_MEM = 16
+DEFAULT_MASTER_MEM = 1
+DEFAULT_WORKER_MEM = 5
+#======================================================
+
+
 #======== Globals (Reference variables) ==========
 ascii_art='''
  ██████╗ ███╗   ██╗███████╗███████╗██╗          ██████╗██╗     ██╗   ██╗███████╗████████╗███████╗██████╗ 
@@ -549,8 +557,8 @@ def main():
 
             if amt_mem==-1:
                 quit(-1)
-            elif amt_mem >= 8:
-                print('Woah there! That\'s a lot of memory you\'re allocating. The master node should never be allocated more than 8gb of memory. Try again.')
+            elif amt_mem >= MAX_MASTER_MEM:
+                print(f'Woah there! That\'s a lot of memory you\'re allocating. The master node should never be allocated more than {MAX_MASTER_MEM} of memory. Try again.')
                 quit()
             else:
                 update_hardware('master',amt_mem)
@@ -564,14 +572,14 @@ def main():
 
             if amt_mem==-1:
                 quit(-1)
-            elif amt_mem >= 16:
-                print('Woah there! That\'s a lot of memory you\'re allocating. Remember that 5 workers are instantiated at a time, so you\'re actually allocating {} gb of memory to the cluster. Try again.'.format(str(amt_mem*5)))
+            elif amt_mem >= MAX_WORKER_MEM:
+                print(f'Woah there! That\'s a lot of memory you\'re allocating. The master node should never be allocated more than {MAX_WORKER_MEM} of memory. Remember that 5 workers are instantiated at a time, so you\'re actually allocating {str(amt_mem*5)} gb of memory to the cluster. Try again.')
                 quit()
             else:
                 update_hardware('worker',amt_mem)
         elif args.subcommand=='default':
-            update_hardware('master', 1)
-            update_hardware('worker', 5)
+            update_hardware('master', DEFAULT_MASTER_MEM)
+            update_hardware('worker', DEFAULT_WORKER_MEM)
         else:
             print('yuh wrong!')
 if __name__=='__main__':
