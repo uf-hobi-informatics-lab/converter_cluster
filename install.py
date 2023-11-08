@@ -35,7 +35,7 @@ else:
     print("Failed to build Docker image.")
 
 # Creating symlink
-if run_command('ln -s {}/cluster.py /usr/local/bin/cluster'.format(install_path)) == 0:
+if run_command('sudo ln -s {}/cluster.py /usr/local/bin/cluster'.format(install_path)) == 0:
     print("Created symlink successfully.")
 else:
     print("Failed to create symlink.")
@@ -97,8 +97,8 @@ except Exception as e:
 data = {"hardware": {"memory_worker": "5g", "memory_master": "1g"}}
 
 try:
-    with open('hardware_config.json','w') as file:
-          json.dump(file)
+    with open(f'{install_path}/hardware_config.json','w') as file:
+          json.dump(data, file)
     print("Initialized the hardware config JSON at {}/hardware_config.json".format(install_path))
 except Exception as e:
-    print("Failed to write to {}/ihardware_config.json. Error: {}".format(install_path, e))
+    print("Failed to write to {}/hardware_config.json. Error: {}".format(install_path, e))
