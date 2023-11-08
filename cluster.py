@@ -32,6 +32,7 @@ import json
 import info.cluster_status as stat
 from datetime import timedelta
 from datetime import datetime
+from filelock import SoftFileLock
 
 
 #============ MEMORY ALLOCATION PARAMETERS ============
@@ -88,8 +89,9 @@ def make_cluster(session_id, cluster_path, datadir, workdir):
     #Dynamically build the docker compose file on boot with appropriate mount dirs
 
     #Get the desired worker memory allocation
-    with open('hardware_config.json','r') as f:
-        memory = json.load(f)
+    with SoftFileLock(f'{absolute_cluster_path}/hardware_config.lock', timeout=10):
+        with open(f'{absolute_cluster_path}/hardware_config.json','r') as f:
+            memory = json.load(f)
     worker_mem = memory['hardware']['memory_worker']
     master_mem = memory['hardware']['memory_master']
 
@@ -153,8 +155,9 @@ networks:
 def spark_submit(session_id, workdir, datadir, script_name, args, ali=False):
 
     #Get the desired worker memory allocation
-    with open('hardware_config.json','r') as f:
-        memory = json.load(f)
+    with SoftFileLock(f'{absolute_cluster_path}/hardware_config.lock', timeout=10):
+        with open(f'{absolute_cluster_path}/hardware_config.json','r') as f:
+            memory = json.load(f)
     worker_mem = memory['hardware']['memory_worker']
     master_mem = memory['hardware']['memory_master']
 
@@ -266,14 +269,16 @@ def shutdown_cluster(session_id, cluster_path, override=False):
 
 def update_hardware(node_type, value):
     #Utility function for updating the memory allocationg config of the cluster using the 'set' command
-    with open('hardware_config.json','r') as f:
-        hardware = json.load(f)
+    with SoftFileLock(f'{absolute_cluster_path}/hardware_config.lock', timeout=10):
+        with open(f'{absolute_cluster_path}/hardware_config.json','r') as f:
+            hardware = json.load(f)
     if node_type=='master':
         hardware['hardware']['memory_master'] = '{}g'.format(str(value))
     if node_type=='worker':
         hardware['hardware']['memory_worker'] = '{}g'.format(str(value))
-    with open('hardware_config.json', 'w') as f:
-        json.dump(hardware, f)
+    with SoftFileLock(f'{absolute_cluster_path}/hardware_config.lock', timeout=10):
+        with open(f'{absolute_cluster_path}/hardware_config.json', 'w') as f:
+            json.dump(hardware, f)
 
 def main():
     
