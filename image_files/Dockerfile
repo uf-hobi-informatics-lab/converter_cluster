@@ -1,5 +1,5 @@
 # Use the bitnami/spark image as the base image
-FROM bitnami/spark:latest
+FROM bitnami/spark:3.3.2-debian-11-r18
 
 # Set the working directory
 WORKDIR /app
