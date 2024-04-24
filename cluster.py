@@ -343,6 +343,13 @@ def main():
         '-l', '--log',
         default='INFO',
         help='Set the logging level (DEBUG, INFO, WARN, ERROR, CRITICAL)')
+    
+    run_parse.add_argument(
+        '-e', '--email',
+        action='store_true',
+        required=False,
+        help='Get email output from the deduplicator step. Must pass in the email to '
+    )
 
     #Handle the passed in file name and arguments
     run_parse.add_argument('file', type=str, default='x', help='The file to run.')
@@ -472,8 +479,15 @@ def main():
 
         logger.setLevel(valid_log_levels[log_level])  
 
+        #Set a logging subdirectory and check if it exists
+        log_directory = 'cluster_logs'
+        if not os.path.exists(log_directory):
+            os.makedirs(log_directory)
+        # Define the log file's path within the newly ensured directory
+        log_file_path = os.path.join(log_directory, '{}.log'.format(session_id))
+
         # Create a file handler
-        file_handler = logging.FileHandler('{}.log'.format(session_id), 'w') 
+        file_handler = logging.FileHandler(log_file_path, 'w') 
         file_handler.setLevel(valid_log_levels[log_level]) 
 
         # Create a console handler
@@ -527,6 +541,10 @@ def main():
         shutdown_cluster(session_id, cluster_path)
         end = time.time()
         run_time = end - start
+
+        if args.email is not None:
+            # Then run the email script
+            os.system('docker run --network=\'host\' --rm -v $(pwd):/app onefl-cluster-image /opt/bitnami/spark/bin/spark-submit /app/email app.py --docker True')
 
         #Format the time output
         hours, rem = divmod(run_time, 3600)
