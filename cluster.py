@@ -45,12 +45,16 @@ DEFAULT_WORKER_MEM = 5
 
 #======== Globals (Reference variables) ==========
 ascii_art='''
- ██████╗ ███╗   ██╗███████╗███████╗██╗          ██████╗██╗     ██╗   ██╗███████╗████████╗███████╗██████╗ 
-██╔═══██╗████╗  ██║██╔════╝██╔════╝██║         ██╔════╝██║     ██║   ██║██╔════╝╚══██╔══╝██╔════╝██╔══██╗
+ ██████╗ ███╗   ██╗███████╗███████╗██╗          ██████╗██╗     ██╗   
+██╗███████╗████████╗███████╗██████╗ 
+██╔═══██╗████╗  ██║██╔════╝██╔════╝██║         ██╔════╝██║     ██║   
+██║██╔════╝╚══██╔══╝██╔════╝██╔══██╗
 ██║   ██║██╔██╗ ██║█████╗  █████╗  ██║         ██║     ██║     ██║   ██║███████╗   ██║   █████╗  ██████╔╝
 ██║   ██║██║╚██╗██║██╔══╝  ██╔══╝  ██║         ██║     ██║     ██║   ██║╚════██║   ██║   ██╔══╝  ██╔══██╗
-╚██████╔╝██║ ╚████║███████╗██║     ███████╗    ╚██████╗███████╗╚██████╔╝███████║   ██║   ███████╗██║  ██║
- ╚═════╝ ╚═╝  ╚═══╝╚══════╝╚═╝     ╚══════╝     ╚═════╝╚══════╝ ╚═════╝ ╚══════╝   ╚═╝   ╚══════╝╚═╝  ╚═╝
+╚██████╔╝██║ ╚████║███████╗██║     ███████╗    ╚██████╗███████╗╚██████╔╝███████║   ██║   
+███████╗██║  ██║
+ ╚═════╝ ╚═╝  ╚═══╝╚══════╝╚═╝     ╚══════╝     ╚═════╝╚══════╝ ╚═════╝ ╚══════╝   ╚═╝   ╚══════╝╚═╝  
+╚═╝
                                                                                                        
 '''
 
@@ -85,7 +89,7 @@ def set_session_id(file):
     return '{}_{}_{}'.format(file_name, os.getpid(), datetime.now().strftime("%Y%m%d"))
 
 
-def make_cluster(session_id, cluster_path, datadir, workdir):
+def make_cluster(session_id, cluster_path, datadir, workdir, outdir):
     #Dynamically build the docker compose file on boot with appropriate mount dirs
 
     #Get the desired worker memory allocation
@@ -98,13 +102,13 @@ def make_cluster(session_id, cluster_path, datadir, workdir):
 
 
     #The text variable looks this way because .yml files are super picky about white space so the formatting of this string has to be precise
-    text = '''
+    text = f'''
 version: "3.8"
 
 services:
   master:
     image: 'onefl-cluster-image:latest'
-    mem_limit: {}
+    mem_limit: {master_mem}
     environment:
       - SPARK_MODE=master
       - SPARK_RPC_AUTHENTICATION_ENABLED=no
@@ -112,36 +116,37 @@ services:
       - SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED=no
       - SPARK_SSL_ENABLED=no
     volumes:
-      - {}:/app
-      - {}:/data
+      - {workdir}:/app
+      - {datadir}:/data
+      - {outdir}:/output
     networks:
-      - pyspark_cluster_network_{}
+      - pyspark_cluster_network_{session_id}
 
   worker:
     image: 'onefl-cluster-image:latest'
-    mem_limit: {}
+    mem_limit: {worker_mem}
     environment:
       - SPARK_MODE=worker
       - SPARK_MASTER_URL=spark://master:7077
-      - SPARK_WORKER_MEMORY={}
+      - SPARK_WORKER_MEMORY={worker_mem}
       - SPARK_WORKER_CORES=1
       - SPARK_RPC_AUTHENTICATION_ENABLED=no
       - SPARK_RPC_ENCRYPTION_ENABLED=no
       - SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED=no
       - SPARK_SSL_ENABLED=no
     volumes:
-      - {}:/app
-      - {}:/data
+      - {workdir}:/app
+      - {datadir}:/data
+      - {outdir}:/output
     depends_on:
       - master
     networks:
-      - pyspark_cluster_network_{}
+      - pyspark_cluster_network_{session_id}
 
 networks:
-    pyspark_cluster_network_{}:
-        name: {}_pyNet
-'''.format(master_mem,workdir,datadir,session_id,worker_mem, worker_mem,workdir,datadir,session_id,session_id,session_id)
-    
+    pyspark_cluster_network_{session_id}:
+        name: {session_id}_pyNet
+'''
     cf = open(cluster_path, 'w')
     num_written = cf.write(text) 
     if num_written != len(text):
@@ -152,7 +157,7 @@ networks:
     
 
 # Build the submit statement and submit
-def spark_submit(session_id, workdir, datadir, script_name, args, ali=False):
+def spark_submit(session_id, workdir, datadir, script_name, args, outdir, ali=False):
 
     #Get the desired worker memory allocation
     with SoftFileLock(f'{absolute_cluster_path}/hardware_config.lock', timeout=10):
@@ -168,39 +173,41 @@ def spark_submit(session_id, workdir, datadir, script_name, args, ali=False):
         state = stat.get_state(session_id)
     if state=='Free':
         if not ali:
-            submit_statement= '''
+            submit_statement= f'''
                 docker run \
                 --memory=500m \
-                --network={}_pyNet \
-                -v {}:/app \
-                -v {}:/data \
-                --name {}_submitter \
+                --network={session_id}_pyNet \
+                -v {workdir}:/app \
+                -v {datadir}:/data \
+                -v {outdir}:/output \
+                --name {session_id}_submitter \
                 --rm onefl-cluster-image \
                 /opt/bitnami/spark/bin/spark-submit \
                 --conf "spark.pyspark.python=python3" \
-                --conf "spark.driver.memory={}" \
-                --conf "spark.executor.memory={}" \
+                --conf "spark.driver.memory={master_mem}" \
+                --conf "spark.executor.memory={worker_mem}" \
                 --master spark://master:7077 \
                 --deploy-mode client \
-                --name my_pyspark_job /app/{} {}'''.format(session_id, workdir, datadir, session_id, master_mem, worker_mem, script_name, args)
+                --name my_pyspark_job /app/{script_name} {args}'''
         if ali:
-            submit_statement= '''
+            submit_statement= f'''
                 docker run \
                 --memory=500m \
-                --network={}_pyNet \
-                -v {}:/app \
-                -v {}:/data \
-                --name {}_submitter \
+                --network={session_id}_pyNet \
+                -v {workdir}:/app \
+                -v {datadir}:/data \
+                -v {outdir}:/output \
+                --name {session_id}_submitter \
                 --rm onefl-cluster-image \
                 /opt/bitnami/spark/bin/spark-submit \
                 --conf "spark.pyspark.python=python3" \
-                --conf "spark.driver.memory={}" \
-                --conf "spark.executor.memory={}" \
+                --conf "spark.driver.memory={master_mem}" \
+                --conf "spark.executor.memory={worker_mem}" \
                 --master spark://master:7077 \
                 --deploy-mode client \
                 --py-files /app/common/* \
                 --jars mssql-jdbc-driver.jar\
-                --name my_pyspark_job /app/{} {}'''.format(session_id, workdir, datadir, session_id, master_mem, worker_mem, script_name, args)
+                --name my_pyspark_job /app/{script_name} {args}'''
         
         #Update the status to reflect running
         stat.update_cluster(session_id, 'Running', 'SUBMIT')
@@ -211,6 +218,9 @@ def spark_submit(session_id, workdir, datadir, script_name, args, ali=False):
         #Update status to free after runninng
         # Format the time
         stat.update_cluster(session_id, 'Free', 'SUBMIT', datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+        if ali:
+            os.system('docker run --network=\'host\' --rm -v $(pwd):/app onefl-cluster-image /opt/bitnami/spark/bin/spark-submit /app/email_app.py --docker True')
+
     else:
         logger.error("Cannot submit job to {}. Cluster is currently {}. Exiting".format(session_id,state.lower()))
         quit(-1)
@@ -309,14 +319,6 @@ def main():
     #Run commands
     run_parse = subparsers.add_parser('run', help='Command for running the boot, submit, and shut down processes of the cluster')
     # Add flags for the 'run' command
-    '''
-    run_parse.add_argument(
-        '-p', '--partner',
-        default='.',
-        required=True,
-        help='Three letter partner name'
-    )
-    '''
     run_parse.add_argument(
         '-d','--datadir',
         default=os.getcwd(),
@@ -329,26 +331,23 @@ def main():
         required=False,
         help='Directory containing the scripts to be submitted to the cluster. By default, this is the directory the command was called from.'
     )
+
+    run_parse.add_argument(
+        '-o','--outbox',
+        default=os.getcwd(),
+        required=False,
+        help='Directory to output data to. By default, this is the working directory.'
+    )
     run_parse.add_argument(
         '-a', '--ali',
         action='store_true',
         required=False,
-        help='Select separate submit statement for Ali testing')
-    #run_parse.add_argument(
-    #    '-c', '--cfg', 
-    #    action='store_true', 
-    #    required=False,
-    #    help='Run the cluster based on the user\'s predefined config file. User can set their config file using the \'cluster config --init\' command')
+        help='Select separate submit statement for Ali testing'
+    )
     run_parse.add_argument(
         '-l', '--log',
         default='INFO',
-        help='Set the logging level (DEBUG, INFO, WARN, ERROR, CRITICAL)')
-    
-    run_parse.add_argument(
-        '-e', '--email',
-        action='store_true',
-        required=False,
-        help='Get email output from the deduplicator step. Must pass in the email to '
+        help='Set the logging level (DEBUG, INFO, WARN, ERROR, CRITICAL)'
     )
 
     #Handle the passed in file name and arguments
@@ -376,6 +375,12 @@ def main():
         required=False,
         help='Directory containing the scripts to be submitted to the cluster. By default, this is the directory the command was called from.'
     )
+    boot_parse.add_argument(
+        '-o','--outbox',
+        default=os.getcwd(),
+        required=False,
+        help='Directory to output data to. By default, this is the working directory.'
+    )
 #========== END OF BOOT_PARSE STATEMENTS =========
 
 #=========== SUBMIT_PARSE ============
@@ -397,6 +402,12 @@ def main():
         default=os.getcwd(),
         required=False,
         help='Directory containing the scripts to be submitted to the cluster. By default, this is the directory the command was called from.'
+    )
+    submit_parse.add_argument(
+        '-o','--outbox',
+        default=os.getcwd(),
+        required=False,
+        help='Directory to output data to. By default, this is the working directory.'
     )
     submit_parse.add_argument('file', type=str, default='x', help='The file to run.')
     submit_parse.add_argument('args', type=str, nargs='*', default=[], help='The arguments for the file.')
@@ -542,10 +553,6 @@ def main():
         end = time.time()
         run_time = end - start
 
-        if args.email is not None:
-            # Then run the email script
-            os.system('docker run --network=\'host\' --rm -v $(pwd):/app onefl-cluster-image /opt/bitnami/spark/bin/spark-submit /app/email app.py --docker True')
-
         #Format the time output
         hours, rem = divmod(run_time, 3600)
         minutes, seconds = divmod(rem, 60)
@@ -596,7 +603,8 @@ def main():
             if amt_mem==-1:
                 quit(-1)
             elif amt_mem >= MAX_WORKER_MEM:
-                print(f'Woah there! That\'s a lot of memory you\'re allocating. The master node should never be allocated more than {MAX_WORKER_MEM} of memory. Remember that 5 workers are instantiated at a time, so you\'re actually allocating {str(amt_mem*5)} gb of memory to the cluster. Try again.')
+                print(f'Woah there! That\'s a lot of memory you\'re allocating. The master node should never be allocated more than {MAX_WORKER_MEM} of memory. Remember that 5 
+workers are instantiated at a time, so you\'re actually allocating {str(amt_mem*5)} gb of memory to the cluster. Try again.')
                 quit()
             else:
                 update_hardware('worker',amt_mem)
@@ -607,3 +615,4 @@ def main():
             print('yuh wrong!')
 if __name__=='__main__':
     main()
+
