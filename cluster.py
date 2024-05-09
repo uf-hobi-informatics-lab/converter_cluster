@@ -329,7 +329,7 @@ def main():
     )
 
     run_parse.add_argument(
-        '-o','--outbox',
+        '-o','--outdir',
         default=os.getcwd(),
         required=False,
         help='Directory to output data to. By default, this is the working directory.'
@@ -372,7 +372,7 @@ def main():
         help='Directory containing the scripts to be submitted to the cluster. By default, this is the directory the command was called from.'
     )
     boot_parse.add_argument(
-        '-o','--outbox',
+        '-o','--outdir',
         default=os.getcwd(),
         required=False,
         help='Directory to output data to. By default, this is the working directory.'
@@ -400,7 +400,7 @@ def main():
         help='Directory containing the scripts to be submitted to the cluster. By default, this is the directory the command was called from.'
     )
     submit_parse.add_argument(
-        '-o','--outbox',
+        '-o','--outdir',
         default=os.getcwd(),
         required=False,
         help='Directory to output data to. By default, this is the working directory.'
@@ -528,6 +528,7 @@ def main():
         logger.info("Session ID: {}".format(session_id))
         logger.info("Data Dir: {}".format(args.datadir))
         logger.info("Work Dir: {}".format(args.workdir))
+        logger.info("Out Dir: {}".format(args.outdir))
         logger.info("File: {}".format(args.file))
         logger.info("Args: {}".format(args.args))
         logger.info("Master memory: {}".format(master_mem))
@@ -537,13 +538,13 @@ def main():
 
         #Boot Cluster
         start = time.time()
-        boot_cluster(session_id, cluster_path, username, args.datadir, args.workdir, args.outbox)
+        boot_cluster(session_id, cluster_path, username, args.datadir, args.workdir, args.outdir)
 
         #Submit to cluster
         if args.ali==True:
-            spark_submit(session_id, args.workdir, args.datadir, args.file, arr_to_str(args.args), args.outbox, True)
+            spark_submit(session_id, args.workdir, args.datadir, args.file, arr_to_str(args.args), args.outdir, True)
         else:
-            spark_submit(session_id, args.workdir, args.datadir, args.file, arr_to_str(args.args), args.outbox)
+            spark_submit(session_id, args.workdir, args.datadir, args.file, arr_to_str(args.args), args.outdir)
 
         #Shutdown cluster
         shutdown_cluster(session_id, cluster_path)
@@ -557,12 +558,12 @@ def main():
         logger.info('Processed finished in {}'.format(formatted_time))
 
     if args.command=='boot':
-        boot_cluster(session_id, cluster_path, username, args.datadir, args.workdir, args.outbox)
+        boot_cluster(session_id, cluster_path, username, args.datadir, args.workdir, args.outdir)
 
     if args.command=='submit':
         logger.info('Submitting job {} to cluster with session ID: {}'.format(args.file, session_id))
         logger.info('Handing off logging to the Spark environment')
-        spark_submit(session_id, args.workdir, args.datadir, args.file, arr_to_str(args.args), args.outbox)
+        spark_submit(session_id, args.workdir, args.datadir, args.file, arr_to_str(args.args), args.outdir)
 
     if args.command=='shutdown':
         if args.force:
