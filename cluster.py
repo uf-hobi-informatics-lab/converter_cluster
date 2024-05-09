@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
-    Script to handle all of the command line arguments 
+    Script to handle all of the command line arguments
 
 
 ----- update the read me - sudo CHMOD    not sudo chown
@@ -9,13 +9,13 @@
 
     To - Dos/POssible things:
 
-    - Add better error handling for config file 
+    - Add better error handling for config file
     - force user to perform first time setup of config
     - set default run mode to be config (maybe?)
     - add additional options to config
             * Set logging level
             * Set file output format - separated files? one big file?
-            * 
+            *
     - format run flags to override config commands
 
 
@@ -45,17 +45,13 @@ DEFAULT_WORKER_MEM = 5
 
 #======== Globals (Reference variables) ==========
 ascii_art='''
- ██████╗ ███╗   ██╗███████╗███████╗██╗          ██████╗██╗     ██╗   
-██╗███████╗████████╗███████╗██████╗ 
-██╔═══██╗████╗  ██║██╔════╝██╔════╝██║         ██╔════╝██║     ██║   
-██║██╔════╝╚══██╔══╝██╔════╝██╔══██╗
+ ██████╗ ███╗   ██╗███████╗███████╗██╗          ██████╗██╗     ██╗   ██╗███████╗████████╗███████╗██████╗
+██╔═══██╗████╗  ██║██╔════╝██╔════╝██║         ██╔════╝██║     ██║   ██║██╔════╝╚══██╔══╝██╔════╝██╔══██╗
 ██║   ██║██╔██╗ ██║█████╗  █████╗  ██║         ██║     ██║     ██║   ██║███████╗   ██║   █████╗  ██████╔╝
 ██║   ██║██║╚██╗██║██╔══╝  ██╔══╝  ██║         ██║     ██║     ██║   ██║╚════██║   ██║   ██╔══╝  ██╔══██╗
-╚██████╔╝██║ ╚████║███████╗██║     ███████╗    ╚██████╗███████╗╚██████╔╝███████║   ██║   
-███████╗██║  ██║
- ╚═════╝ ╚═╝  ╚═══╝╚══════╝╚═╝     ╚══════╝     ╚═════╝╚══════╝ ╚═════╝ ╚══════╝   ╚═╝   ╚══════╝╚═╝  
-╚═╝
-                                                                                                       
+╚██████╔╝██║ ╚████║███████╗██║     ███████╗    ╚██████╗███████╗╚██████╔╝███████║   ██║   ███████╗██║  ██║
+ ╚═════╝ ╚═╝  ╚═══╝╚══════╝╚═╝     ╚══════╝     ╚═════╝╚══════╝ ╚═════╝ ╚══════╝   ╚═╝   ╚══════╝╚═╝  ╚═╝
+
 '''
 
 absolute_cluster_path='[CHANGE ME]'
@@ -63,7 +59,7 @@ absolute_cluster_path='[CHANGE ME]'
 logger = logging.getLogger()
 
 valid_log_levels = {
-    'DEBUG':logging.DEBUG,  
+    'DEBUG':logging.DEBUG,
     'INFO':logging.INFO,
     'WARN':logging.WARN,
     'ERROR':logging.ERROR,
@@ -148,13 +144,13 @@ networks:
         name: {session_id}_pyNet
 '''
     cf = open(cluster_path, 'w')
-    num_written = cf.write(text) 
+    num_written = cf.write(text)
     if num_written != len(text):
         logger.error('Failed to write {}.yml at {}. Exiting'.format(session_id,cluster_path))
         quit(-1)
     else:
         logger.info('Successfully wrote {} to {}'.format(session_id,cluster_path))
-    
+
 
 # Build the submit statement and submit
 def spark_submit(session_id, workdir, datadir, script_name, args, outdir, ali=False):
@@ -208,7 +204,7 @@ def spark_submit(session_id, workdir, datadir, script_name, args, outdir, ali=Fa
                 --py-files /app/common/* \
                 --jars mssql-jdbc-driver.jar\
                 --name my_pyspark_job /app/{script_name} {args}'''
-        
+
         #Update the status to reflect running
         stat.update_cluster(session_id, 'Running', 'SUBMIT')
 
@@ -225,11 +221,11 @@ def spark_submit(session_id, workdir, datadir, script_name, args, outdir, ali=Fa
         logger.error("Cannot submit job to {}. Cluster is currently {}. Exiting".format(session_id,state.lower()))
         quit(-1)
 
-def boot_cluster(session_id, cluster_path, username, datadir, workdir):
+def boot_cluster(session_id, cluster_path, username, datadir, workdir, outdir):
 
     #Create the session's cluster
     logger.info('Creating the cluster directory for {}'.format(session_id))
-    make_cluster(session_id, cluster_path, datadir, workdir)
+    make_cluster(session_id, cluster_path, datadir, workdir, outdir)
 
     #boot up the cluster
     logger.info('Booting the cluster for {}'.format(session_id))
@@ -275,7 +271,7 @@ def shutdown_cluster(session_id, cluster_path, override=False):
         os.rmdir('{}/clusters/{}'.format(absolute_cluster_path, session_id))
 
         stat.remove_cluster(session_id)
-        
+
 
 def update_hardware(node_type, value):
     #Utility function for updating the memory allocationg config of the cluster using the 'set' command
@@ -291,8 +287,8 @@ def update_hardware(node_type, value):
             json.dump(hardware, f)
 
 def main():
-    
-    
+
+
     #Get username calling the script for status (Implementation pulled from ChatGPT)
     user_id = os.geteuid()
     username = pwd.getpwuid(user_id).pw_name
@@ -300,7 +296,7 @@ def main():
 ####################################################
 #                                                  #
 #      Declare and define parsing operations       #
-#                                                  #                                                  
+#                                                  #
 ####################################################
     # Create the top-level parser
     parser = argparse.ArgumentParser(prog='cluster')
@@ -435,7 +431,7 @@ def main():
 
 #========== STATUS_PARSE ===============
     status_parse = subparsers.add_parser('status',help='Command to shutdown one or more clusters')
-    
+
 #========== END OF STATUS_PARSE ==========
 
 #========== HARDWARE_CONFIG_PARSE ===========
@@ -461,7 +457,7 @@ def main():
 ####################################################
 #                                                  #
 #          Set environment configuration           #
-#                                                  #                                                  
+#                                                  #
 ####################################################
 #========= VARIABLES =======
     if args.command!='status' and args.command!='set':
@@ -488,7 +484,7 @@ def main():
         else:
             log_level = 'INFO'
 
-        logger.setLevel(valid_log_levels[log_level])  
+        logger.setLevel(valid_log_levels[log_level])
 
         #Set a logging subdirectory and check if it exists
         log_directory = 'cluster_logs'
@@ -498,8 +494,8 @@ def main():
         log_file_path = os.path.join(log_directory, '{}.log'.format(session_id))
 
         # Create a file handler
-        file_handler = logging.FileHandler(log_file_path, 'w') 
-        file_handler.setLevel(valid_log_levels[log_level]) 
+        file_handler = logging.FileHandler(log_file_path, 'w')
+        file_handler.setLevel(valid_log_levels[log_level])
 
         # Create a console handler
         console_handler = logging.StreamHandler()
@@ -520,12 +516,13 @@ def main():
 
     # Check what command was given
     if args.command == 'run':
-        with open('hardware_config.json','r') as f:
-            memory = json.load(f)
+        with SoftFileLock(f'{absolute_cluster_path}/hardware_config.lock', timeout=10):
+            with open(f'{absolute_cluster_path}/hardware_config.json','r') as f:
+                memory = json.load(f)
         worker_mem = memory['hardware']['memory_worker']
         master_mem = memory['hardware']['memory_master']
         print(ascii_art)
-        
+
         #Write cluster settings to the log
         logger.info('Initializing cluster with the following settings:')
         logger.info("Session ID: {}".format(session_id))
@@ -535,18 +532,18 @@ def main():
         logger.info("Args: {}".format(args.args))
         logger.info("Master memory: {}".format(master_mem))
         logger.info("Worker memory: {}".format(worker_mem))
-        
 
-       
+
+
         #Boot Cluster
         start = time.time()
-        boot_cluster(session_id, cluster_path, username, args.datadir, args.workdir)
+        boot_cluster(session_id, cluster_path, username, args.datadir, args.workdir, args.outbox)
 
         #Submit to cluster
         if args.ali==True:
-            spark_submit(session_id, args.workdir, args.datadir, args.file, arr_to_str(args.args), True)
+            spark_submit(session_id, args.workdir, args.datadir, args.file, arr_to_str(args.args), args.outbox, True)
         else:
-            spark_submit(session_id, args.workdir, args.datadir, args.file, arr_to_str(args.args))
+            spark_submit(session_id, args.workdir, args.datadir, args.file, arr_to_str(args.args), args.outbox)
 
         #Shutdown cluster
         shutdown_cluster(session_id, cluster_path)
@@ -558,14 +555,14 @@ def main():
         minutes, seconds = divmod(rem, 60)
         formatted_time = "{:0>2}:{:0>2}:{:05.2f}".format(int(hours),int(minutes),seconds)
         logger.info('Processed finished in {}'.format(formatted_time))
-    
+
     if args.command=='boot':
-        boot_cluster(session_id, cluster_path, username, args.datadir, args.workdir)
+        boot_cluster(session_id, cluster_path, username, args.datadir, args.workdir, args.outbox)
 
     if args.command=='submit':
         logger.info('Submitting job {} to cluster with session ID: {}'.format(args.file, session_id))
         logger.info('Handing off logging to the Spark environment')
-        spark_submit(session_id, args.workdir, args.datadir, args.file, arr_to_str(args.args))
+        spark_submit(session_id, args.workdir, args.datadir, args.file, arr_to_str(args.args), args.outbox)
 
     if args.command=='shutdown':
         if args.force:
@@ -573,7 +570,7 @@ def main():
             shutdown_cluster(session_id,cluster_path,True)
         else:
             shutdown_cluster(session_id, cluster_path)
-        
+
     if args.command=='status':
         stat.print_status()
 
@@ -603,8 +600,7 @@ def main():
             if amt_mem==-1:
                 quit(-1)
             elif amt_mem >= MAX_WORKER_MEM:
-                print(f'Woah there! That\'s a lot of memory you\'re allocating. The master node should never be allocated more than {MAX_WORKER_MEM} of memory. Remember that 5 
-workers are instantiated at a time, so you\'re actually allocating {str(amt_mem*5)} gb of memory to the cluster. Try again.')
+                print(f'Woah there! That\'s a lot of memory you\'re allocating. The master node should never be allocated more than {MAX_WORKER_MEM} of memory. Remember that 5 workers are instantiated at a time, so you\'re actually allocating {str(amt_mem*5)} gb of memory to the cluster. Try again.')
                 quit()
             else:
                 update_hardware('worker',amt_mem)
@@ -615,4 +611,3 @@ workers are instantiated at a time, so you\'re actually allocating {str(amt_mem*
             print('yuh wrong!')
 if __name__=='__main__':
     main()
-

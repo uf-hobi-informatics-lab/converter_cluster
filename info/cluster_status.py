@@ -2,7 +2,7 @@ import json
 from filelock import SoftFileLock
 #Need file locks to prevent race conditions
 
-info_path = '/Users/jasonglover/Documents/Code/test_cluster/info/'
+info_path = '[CHANGE ME]'
 
 json_path = info_path + 'clusters.json'
 lock_path = info_path + 'clusters.lock'
