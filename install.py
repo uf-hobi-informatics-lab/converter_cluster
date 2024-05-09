@@ -19,6 +19,24 @@ if run_command('mkdir {}/clusters'.format(install_path)) == 0:
 else:
     print("Failed to create the clusters directory.")
 
+
+#Create the cluster json
+try:
+    with open('{}/info/clusters.json'.format(install_path), 'w') as file:
+        json.dump(data, file)
+    print("Initialized the cluster status JSON at {}/info/clusters.json successfully.".format(install_path))
+except Exception as e:
+    print("Failed to write to {}/info/clusters.json. Error: {}".format(install_path, e))
+
+data = {"hardware": {"memory_worker": "5g", "memory_master": "1g"}}
+
+try:
+    with open(f'{install_path}/hardware_config.json','w') as file:
+          json.dump(data, file)
+    print("Initialized the hardware config JSON at {}/hardware_config.json".format(install_path))
+except Exception as e:
+    print("Failed to write to {}/hardware_config.json. Error: {}".format(install_path, e))
+    
 # Changing permissions
 if run_command('sudo chmod -R 777 {}'.format(install_path)) == 0:
     print("Changed permissions for {} successfully.".format(install_path))
@@ -85,20 +103,3 @@ data = {
         "user":"none"
     }
 }
-
-#Create the cluster json
-try:
-    with open('{}/info/clusters.json'.format(install_path), 'w') as file:
-        json.dump(data, file)
-    print("Initialized the cluster status JSON at {}/info/clusters.json successfully.".format(install_path))
-except Exception as e:
-    print("Failed to write to {}/info/clusters.json. Error: {}".format(install_path, e))
-
-data = {"hardware": {"memory_worker": "5g", "memory_master": "1g"}}
-
-try:
-    with open(f'{install_path}/hardware_config.json','w') as file:
-          json.dump(data, file)
-    print("Initialized the hardware config JSON at {}/hardware_config.json".format(install_path))
-except Exception as e:
-    print("Failed to write to {}/hardware_config.json. Error: {}".format(install_path, e))
