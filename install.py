@@ -20,7 +20,19 @@ else:
     print("Failed to create the clusters directory.")
 
 
+
 #Create the cluster json
+
+# Writing JSON data to file
+data = {
+    "dummy_cluster": {
+        "state": "inactive",
+        "last_run_time": "1970-01-01 00:00:00",
+        "last_command": "none",
+        "user":"none"
+    }
+}
+
 try:
     with open('{}/info/clusters.json'.format(install_path), 'w') as file:
         json.dump(data, file)
@@ -36,7 +48,7 @@ try:
     print("Initialized the hardware config JSON at {}/hardware_config.json".format(install_path))
 except Exception as e:
     print("Failed to write to {}/hardware_config.json. Error: {}".format(install_path, e))
-    
+
 # Changing permissions
 if run_command('sudo chmod -R 777 {}'.format(install_path)) == 0:
     print("Changed permissions for {} successfully.".format(install_path))
@@ -92,14 +104,3 @@ except FileNotFoundError:
 except Exception as e:
         print(f"An error occurred: {e}")
 print("Succesfully updated the path in 'cluster.py'")
-
-
-# Writing JSON data to file
-data = {
-    "dummy_cluster": {
-        "state": "inactive",
-        "last_run_time": "1970-01-01 00:00:00",
-        "last_command": "none",
-        "user":"none"
-    }
-}
