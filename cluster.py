@@ -585,7 +585,7 @@ def main():
 
             if amt_mem==-1:
                 quit(-1)
-            elif amt_mem >= MAX_MASTER_MEM:
+            elif amt_mem > MAX_MASTER_MEM:
                 print(f'Woah there! That\'s a lot of memory you\'re allocating. The master node should never be allocated more than {MAX_MASTER_MEM} of memory. Try again.')
                 quit()
             else:
@@ -600,7 +600,7 @@ def main():
 
             if amt_mem==-1:
                 quit(-1)
-            elif amt_mem >= MAX_WORKER_MEM:
+            elif amt_mem > MAX_WORKER_MEM:
                 print(f'Woah there! That\'s a lot of memory you\'re allocating. The master node should never be allocated more than {MAX_WORKER_MEM} of memory. Remember that 5 workers are instantiated at a time, so you\'re actually allocating {str(amt_mem*5)} gb of memory to the cluster. Try again.')
                 quit()
             else:
