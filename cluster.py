@@ -103,7 +103,7 @@ version: "3.8"
 
 services:
   master:
-    image: 'onefl-cluster-image:latest'
+    image: 'onefl-cluster-image:1.0-stable'
     mem_limit: {master_mem}
     environment:
       - SPARK_MODE=master
@@ -119,7 +119,7 @@ services:
       - pyspark_cluster_network_{session_id}
 
   worker:
-    image: 'onefl-cluster-image:latest'
+    image: 'onefl-cluster-image:1.0-stable'
     mem_limit: {worker_mem}
     environment:
       - SPARK_MODE=worker
@@ -177,7 +177,7 @@ def spark_submit(session_id, workdir, datadir, script_name, args, outdir, ali=Fa
                 -v {datadir}:/data \
                 -v {outdir}:/output \
                 --name {session_id}_submitter \
-                --rm onefl-cluster-image \
+                --rm onefl-cluster-image:1.0-stable \
                 /opt/bitnami/spark/bin/spark-submit \
                 --conf "spark.pyspark.python=python3" \
                 --conf "spark.driver.memory={master_mem}" \
@@ -194,7 +194,7 @@ def spark_submit(session_id, workdir, datadir, script_name, args, outdir, ali=Fa
                 -v {datadir}:/data \
                 -v {outdir}:/output \
                 --name {session_id}_submitter \
-                --rm onefl-cluster-image \
+                --rm onefl-cluster-image:1.0-stable \
                 /opt/bitnami/spark/bin/spark-submit \
                 --conf "spark.pyspark.python=python3" \
                 --conf "spark.driver.memory={master_mem}" \
