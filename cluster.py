@@ -54,7 +54,8 @@ ascii_art='''
 
 '''
 
-absolute_cluster_path='[CHANGE ME]'
+ABSOLUTE_CLUSTER_PATH='[CHANGE ME]'
+IMAGE_NAME='onefl-cluster-image:1.0-stable'
 
 logger = logging.getLogger()
 
@@ -69,9 +70,9 @@ valid_log_levels = {
 #========= Functions =========
 def set_path(session_id):
     #set the path of the docker compose yml for the requested partner
-    if not os.path.exists('{}/clusters/{}'.format(absolute_cluster_path,session_id)):
-        os.mkdir('{}/clusters/{}'.format(absolute_cluster_path, session_id))
-    return '{}/clusters/{}/docker-compose.yml'.format(absolute_cluster_path, session_id)
+    if not os.path.exists('{}/clusters/{}'.format(ABSOLUTE_CLUSTER_PATH,session_id)):
+        os.mkdir('{}/clusters/{}'.format(ABSOLUTE_CLUSTER_PATH, session_id))
+    return '{}/clusters/{}/docker-compose.yml'.format(ABSOLUTE_CLUSTER_PATH, session_id)
 
 
 def arr_to_str(array):
@@ -89,8 +90,8 @@ def make_cluster(session_id, cluster_path, datadir, workdir, outdir):
     #Dynamically build the docker compose file on boot with appropriate mount dirs
 
     #Get the desired worker memory allocation
-    with SoftFileLock(f'{absolute_cluster_path}/hardware_config.lock', timeout=10):
-        with open(f'{absolute_cluster_path}/hardware_config.json','r') as f:
+    with SoftFileLock(f'{ABSOLUTE_CLUSTER_PATH}/hardware_config.lock', timeout=10):
+        with open(f'{ABSOLUTE_CLUSTER_PATH}/hardware_config.json','r') as f:
             memory = json.load(f)
     worker_mem = memory['hardware']['memory_worker']
     master_mem = memory['hardware']['memory_master']
@@ -103,7 +104,7 @@ version: "3.8"
 
 services:
   master:
-    image: 'onefl-cluster-image:1.0-stable'
+    image: '{IMAGE_NAME}'
     mem_limit: {master_mem}
     environment:
       - SPARK_MODE=master
@@ -119,7 +120,7 @@ services:
       - pyspark_cluster_network_{session_id}
 
   worker:
-    image: 'onefl-cluster-image:1.0-stable'
+    image: '{IMAGE_NAME}'
     mem_limit: {worker_mem}
     environment:
       - SPARK_MODE=worker
@@ -156,8 +157,8 @@ networks:
 def spark_submit(session_id, workdir, datadir, script_name, args, outdir, ali=False):
 
     #Get the desired worker memory allocation
-    with SoftFileLock(f'{absolute_cluster_path}/hardware_config.lock', timeout=10):
-        with open(f'{absolute_cluster_path}/hardware_config.json','r') as f:
+    with SoftFileLock(f'{ABSOLUTE_CLUSTER_PATH}/hardware_config.lock', timeout=10):
+        with open(f'{ABSOLUTE_CLUSTER_PATH}/hardware_config.json','r') as f:
             memory = json.load(f)
     worker_mem = memory['hardware']['memory_worker']
     master_mem = memory['hardware']['memory_master']
@@ -177,7 +178,7 @@ def spark_submit(session_id, workdir, datadir, script_name, args, outdir, ali=Fa
                 -v {datadir}:/data \
                 -v {outdir}:/output \
                 --name {session_id}_submitter \
-                --rm onefl-cluster-image:1.0-stable \
+                --rm {IMAGE_NAME} \
                 /opt/bitnami/spark/bin/spark-submit \
                 --conf "spark.pyspark.python=python3" \
                 --conf "spark.driver.memory={master_mem}" \
@@ -194,7 +195,7 @@ def spark_submit(session_id, workdir, datadir, script_name, args, outdir, ali=Fa
                 -v {datadir}:/data \
                 -v {outdir}:/output \
                 --name {session_id}_submitter \
-                --rm onefl-cluster-image:1.0-stable \
+                --rm {IMAGE_NAME} \
                 /opt/bitnami/spark/bin/spark-submit \
                 --conf "spark.pyspark.python=python3" \
                 --conf "spark.driver.memory={master_mem}" \
@@ -253,7 +254,7 @@ def shutdown_cluster(session_id, cluster_path, override=False):
             os.system('docker compose -f {} down'.format(cluster_path))
             logger.info('Removing cluster directory for {}'.format(session_id))
             os.remove(cluster_path)
-            os.rmdir('{}/clusters/{}'.format(absolute_cluster_path, session_id))
+            os.rmdir('{}/clusters/{}'.format(ABSOLUTE_CLUSTER_PATH, session_id))
 
             stat.remove_cluster(session_id)
     if state=='Booting':
@@ -268,22 +269,22 @@ def shutdown_cluster(session_id, cluster_path, override=False):
         os.system('docker compose -f {} down'.format(cluster_path))
         logger.info('Removing cluster directory for {}'.format(session_id))
         os.remove(cluster_path)
-        os.rmdir('{}/clusters/{}'.format(absolute_cluster_path, session_id))
+        os.rmdir('{}/clusters/{}'.format(ABSOLUTE_CLUSTER_PATH, session_id))
 
         stat.remove_cluster(session_id)
 
 
 def update_hardware(node_type, value):
     #Utility function for updating the memory allocationg config of the cluster using the 'set' command
-    with SoftFileLock(f'{absolute_cluster_path}/hardware_config.lock', timeout=10):
-        with open(f'{absolute_cluster_path}/hardware_config.json','r') as f:
+    with SoftFileLock(f'{ABSOLUTE_CLUSTER_PATH}/hardware_config.lock', timeout=10):
+        with open(f'{ABSOLUTE_CLUSTER_PATH}/hardware_config.json','r') as f:
             hardware = json.load(f)
     if node_type=='master':
         hardware['hardware']['memory_master'] = '{}g'.format(str(value))
     if node_type=='worker':
         hardware['hardware']['memory_worker'] = '{}g'.format(str(value))
-    with SoftFileLock(f'{absolute_cluster_path}/hardware_config.lock', timeout=10):
-        with open(f'{absolute_cluster_path}/hardware_config.json', 'w') as f:
+    with SoftFileLock(f'{ABSOLUTE_CLUSTER_PATH}/hardware_config.lock', timeout=10):
+        with open(f'{ABSOLUTE_CLUSTER_PATH}/hardware_config.json', 'w') as f:
             json.dump(hardware, f)
 
 def main():
@@ -516,8 +517,8 @@ def main():
 
     # Check what command was given
     if args.command == 'run':
-        with SoftFileLock(f'{absolute_cluster_path}/hardware_config.lock', timeout=10):
-            with open(f'{absolute_cluster_path}/hardware_config.json','r') as f:
+        with SoftFileLock(f'{ABSOLUTE_CLUSTER_PATH}/hardware_config.lock', timeout=10):
+            with open(f'{ABSOLUTE_CLUSTER_PATH}/hardware_config.json','r') as f:
                 memory = json.load(f)
         worker_mem = memory['hardware']['memory_worker']
         master_mem = memory['hardware']['memory_master']
