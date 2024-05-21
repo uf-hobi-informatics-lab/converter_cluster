@@ -79,8 +79,8 @@ try:
         
     with open('{}/cluster.py'.format(install_path), 'w') as file:
         for line in lines:
-            if line.strip() == "absolute_cluster_path='[CHANGE ME]'":
-                file.write("absolute_cluster_path='{}'\n".format(install_path))
+            if line.strip() == "ABSOLUTE_CLUSTER_PATH='[CHANGE ME]'":
+                file.write("ABSOLUTE_CLUSTER_PATH='{}'\n".format(install_path))
             else:
                     file.write(line)
 except FileNotFoundError:
