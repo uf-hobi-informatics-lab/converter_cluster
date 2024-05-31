@@ -5,3 +5,5 @@ pycrypto
 openpyxl
 matplotlib
 python-dateutil
+pyarrow
+sqlalchemy
