@@ -6,7 +6,7 @@ def inside(p):
     return x * x + y * y < 1
 
 if __name__ == '__main__':
-    spark = SparkSession.builder \
+    spark = SparkSession.builder.master("spark://master:7077") \
         .appName("Pi Calculation") \
         .getOrCreate()
 

@@ -99,7 +99,28 @@ Shut down a specified cluster. By default, only clusters in the 'FREE' state can
 
     $ cluster shutdown [-h] [-f] session_id
 
-#### 5. status
+#### 5. set
+
+Adjust the memory allocation for the master and worker nodes of the cluster. Default values are 1 gb for the master node and 5gb per worker node. When adjusting the memory allocation of the cluster, consider your hardware restrictions and how many clusters are going to be booted at the same time. 
+
+*Accepted Keywords*
+
+- `master`: [Takes INT as passed in value] Sets the memory allocation for the master node equal to the passed in value. Note that by default the cluster will refuse to allocate more than 8gb of memory for the master node.
+- `worker`: [Takes INT as passed in value] Sets the memory allocation for each worker node equal to the passed in value. Note that by deault the cluster will refuse to allocate more than 16gb of memory per worker node.
+- `default`: Reset the memory allocation config to default parameters.
+- `-h`: Help.
+
+> **Note**: The maximum allowed memory values and default values can be adjusted at the top of the cluster.py file.
+
+*Syntax*
+
+    $ cluster set [-h] {master,worker,default} [INTEGER_VALUE]
+
+*Examples*
+
+    $ cluster set master 5
+
+#### 6. status
 
 Display a list of the currently instantiated clusters with relevant details.
 
@@ -133,4 +154,4 @@ Display a list of the currently instantiated clusters with relevant details.
 
 Jason Glover <br>
 Contact: jasonglover [at] ufl [dot] edu <br>
-Last Updated: 09/01/2023
+Last Updated: 11/08/2023

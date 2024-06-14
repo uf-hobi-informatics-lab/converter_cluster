@@ -1,5 +1,5 @@
 # Use the bitnami/spark image as the base image
-FROM bitnami/spark:latest
+FROM bitnami/spark:3.3.2-debian-11-r18
 
 # Set the working directory
 WORKDIR /app
@@ -25,7 +25,7 @@ RUN mv /app /docker_app
 RUN mkdir /docker_data
 RUN chmod 777 /docker_data
 
-
+ENV PYARROW_IGNORE_TIMEZONE=1
 
 RUN rm /opt/bitnami/python/lib/python3.9/site-packages/Crypto/Cipher/XOR.py
 
