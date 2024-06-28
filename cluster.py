@@ -172,7 +172,7 @@ def spark_submit(session_id, workdir, datadir, script_name, args, outdir, ali=Fa
         if not ali:
             submit_statement= f'''
                 docker run \
-                --memory=500m \
+                --memory=5g \
                 --network={session_id}_pyNet \
                 -v {workdir}:/app \
                 -v {datadir}:/data \
@@ -189,7 +189,7 @@ def spark_submit(session_id, workdir, datadir, script_name, args, outdir, ali=Fa
         if ali:
             submit_statement= f'''
                 docker run \
-                --memory=500m \
+                --memory=5g \
                 --network={session_id}_pyNet \
                 -v {workdir}:/app \
                 -v {datadir}:/data \
