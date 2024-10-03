@@ -12,9 +12,11 @@ COPY requirements.txt /app
 USER root
 
 # Install a C compiler and pip3
+# Install dependencies and libraries
 RUN apt-get update && \
-    apt-get install -y gcc && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y gcc unixodbc unixodbc-dev && \
     pip3 install --no-cache-dir -r requirements.txt
+
 
 # Grant full permissions to non root user
 RUN chmod 777 /opt/bitnami/spark/tmp

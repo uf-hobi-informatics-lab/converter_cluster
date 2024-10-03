@@ -55,7 +55,7 @@ ascii_art='''
 '''
 
 ABSOLUTE_CLUSTER_PATH='[CHANGE ME]'
-IMAGE_NAME='onefl-cluster-image:1.0-stable'
+IMAGE_NAME='onefl-cluster-image:[TAG]'
 
 logger = logging.getLogger()
 

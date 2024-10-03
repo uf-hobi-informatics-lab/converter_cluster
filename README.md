@@ -2,22 +2,37 @@
 
 The OneFlorida+ Cluster is a virtualized cluster handler that uses custom software to dynamically instantiate clusters, submit jobs to the clusters, and clean up these clusters. This software leverages a custom Docker image, Docker compose, and PySpark to create an ultra fast parallel processing system, that is fully customizable and easily automatable through a command-line interface. This system was developed by Jason Glover. <br>
 
-## Installing the cluster
+## Installing the Cluster
 PREREQUISITES FOR INSTALLATION: This package has only been tested on Linux and Unix based systems. THIS PACKAGE WILL NOT WORK ON WINDOWS. Docker is required for this package to run correctly. If encountering Docker related issues with Docker installed, ensure the daemon is running.
 
 1. Navigate to the desired install path on the system. For the rest of the documentation, we call this `$INSTALL_PATH`.
 2. In this location, clone the repo by calling 
         
         git clone https://github.com/uf-hobi-informatics-lab/converter_cluster.git
-3. User will have received the custom image `onefl-cluster-image.tar` through OneFlorida+ directly. Copy this file to `$INSTALL_PATH/converter_cluser/image_files/`.
 3. From there, `cd` into the repo with `cd $INSTALL_PATH/converter_cluster` and run 
 
         python3 install.py
 > **Note**: User will be prompted for password to use 'sudo'. Admin permissions are used to ensure that calling 'chmod' on the repo is allowed.
-4. You can verify that everything has been installed correctly by using the `verify_cluster.py` script, located at the top level of the repo. From here, run
+4. The Docker image should be installed from the previous step. If not, see the `Installing the Docker Image from Download` section below. Verify the name and tag of the Docker image by running
+
+        docker image ls
+    If installed correctly, there will be an image titled `onefl-cluster-image` with an associated `[TAG]` listed. Navigate to `cluster.py` in the top level of the repo and use a text editor to modify the line `IMAGE_NAME='onefl-cluster-image:[TAG]'`. Update `[TAG]` to the specific tag listed on your system. 
+
+5. You can verify that everything has been installed correctly by using the `verify_cluster.py` script, located at the top level of the repo. From here, run
 
         cluster run verify_cluster.py
     The script has run correctly if in the output there is a line that reads 'Cluster is running as expected.'
+
+### Installing the Docker Image From Download
+In the event that your firewall prevents you from building the Docker image from the included Dockerfile, we will provide a compressed version of the image that is downloadable. 
+
+1. Download the image from the provided link.
+2. Move the compressed image to the server where the cluster has been installed.
+3. Run
+
+        docker load -i [COMPRESSED_IMAGE_NAME].tar
+
+From her 
 
 ## Using the Cluster
 
