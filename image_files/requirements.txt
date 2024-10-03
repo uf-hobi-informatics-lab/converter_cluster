@@ -7,3 +7,4 @@ matplotlib
 python-dateutil
 pyarrow
 sqlalchemy
+pyodbc
