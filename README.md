@@ -31,8 +31,7 @@ In the event that your firewall prevents you from building the Docker image from
 3. Run
 
         docker load -i [COMPRESSED_IMAGE_NAME].tar
-
-From her 
+ 
 
 ## Using the Cluster
 
