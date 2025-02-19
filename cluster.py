@@ -203,7 +203,7 @@ def spark_submit(session_id, workdir, datadir, script_name, args, outdir, ali=Fa
                 --master spark://master:7077 \
                 --deploy-mode client \
                 --py-files /app/common/* \
-                --jars mssql-jdbc-driver.jar\
+                --jars mssql-jdbc-driver.jar, postgresql-42.7.4.jar\
                 --name my_pyspark_job /app/{script_name} {args}'''
 
         #Update the status to reflect running
